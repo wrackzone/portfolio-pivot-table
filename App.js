@@ -28,7 +28,7 @@ Ext.define('CustomApp', {
 
     	var configs = _.map( types, function(type) {
             return {
-                fetch : ['_UnformattedID','ObjectID','_TypeHierarchy','c_STO', '_ItemHierarchy',
+                fetch : ['Name','_UnformattedID','ObjectID','_TypeHierarchy','c_STO', '_ItemHierarchy',
                 			'InvestmentCategory','PortfolioItemType','State','Owner'
                 		],
                 hydrate : ['_TypeHierarchy','State','PortfolioItemType','InvestmentCategory'],
@@ -66,6 +66,7 @@ Ext.define('CustomApp', {
     				console.log(themeid,t.get("ObjectID"),themeid===t.get("ObjectID"));
     				return t.get("ObjectID") === themeid; 
     			});
+    			console.log("Theme",theme.get("Name"));
 	    		feature.set("Theme",theme.get("Name"));
 	    	}
     	});
