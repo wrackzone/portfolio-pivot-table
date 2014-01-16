@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>portfolio-pivot-table</title>
+
+    <script type="text/javascript" src="/apps/2.0rc2/sdk.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/async/1.22/async.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="https://c9.io/bazzert/cycle-time-by-state/workspace/lib/pivot.js"></script>
+
+    <script type="text/javascript">
+        Rally.onReady(function () {
+                var app=null,types=["PortfolioItem/Feature","PortfolioItem/Initiative","PortfolioItem/Theme"];Ext.define("CustomApp",{extend:"Rally.app.App",componentCls:"app",items:{html:'<a href="https://help.rallydev.com/apps/2.0rc2/doc/">App SDK 2.0rc2 Docs</a>'},launch:function(){app=this,this.readPortfolioItems()},readPortfolioItems:function(){var configs=_.map(types,function(type){return{fetch:["_UnformattedID","ObjectID","_TypeHierarchy","c_STO","InvestmentCategory","PortfolioItemType","PortfolioItemTypeName","State","Owner"],hydrate:["_TypeHierarchy","State","PortfolioItemType"],find:{_TypeHierarchy:{$in:[type]},_ProjectHierarchy:{$in:app.getContext().getProject().ObjectID}}}});async.mapSeries(configs,app.readSnapshots,function(err,results){console.log("results",results)})},readSnapshots:function(config,callback){console.log("reading page of snapshots...");var storeConfig={find:config.find,autoLoad:!0,pageSize:1e3,limit:"Infinity",fetch:config.fetch,hydrate:config.hydrate,listeners:{scope:this,load:function(store,snapshots,success){callback(null,snapshots)}}},snapshotStore=Ext.create("Rally.data.lookback.SnapshotStore",storeConfig)}});
+
+            Rally.launchApp('CustomApp', {
+                name:"portfolio-pivot-table",
+	            parentRepos:""
+            });
+
+        });
+    </script>
+
+
+    <style type="text/css">
+        .app {
+     /* Add app styles here */
+}
+
+    </style>
+    <style type="text/css">
+        
+table.pvtTable {
+    font-family:arial;
+    font-size: 8pt;
+    text-align: left;
+    border-collapse: collapse;
+}
+table.pvtTable tr th, table.pvtTable tr th {
+    background-color: #e6EEEE;
+    border: 1px solid #CDCDCD;
+    font-size: 8pt;
+    padding: 5px;
+}
+
+table.pvtTable .pvtColLabel {text-align: center;}
+table.pvtTable .pvtTotalLabel {text-align: right;}
+
+table.pvtTable tr td {
+    color: #3D3D3D;
+    padding: 5px;
+    background-color: #FFF;
+    border: 1px solid #CDCDCD;
+    vertical-align: top;
+    text-align: right;
+}
+
+.pvtTotal, .pvtGrandTotal { font-weight: bold; }
+
+.pvtAxisContainer {
+    border: 1px solid gray;
+    background: #EEE;
+    padding: 5px;
+    min-width: 20px;
+    min-height: 20px;
+}
+.pvtAxisContainer li {
+    margin: 5px;
+    padding: 5px;
+    list-style-type: none;
+    cursor:move;
+}
+
+.pvtHorizList li { display: inline; }
+
+    </style>
+</head>
+<body></body>
+</html>
