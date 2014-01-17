@@ -80,7 +80,7 @@ Ext.define('CustomApp', {
 	        pageSize:1000,
 	        find : {
 	            '_TypeHierarchy' : { "$in" : ["PortfolioItem/Theme"]} ,
-	            '_ProjectHierarchy' : { "$in": app.getContext().getProject().ObjectID }, 
+	            // '_ProjectHierarchy' : { "$in": app.getContext().getProject().ObjectID }, 
 	            __At : 'current'
 	        },
 	    };
