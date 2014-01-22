@@ -24,20 +24,36 @@ Ext.define('CustomApp', {
 
         app.mask = new Ext.LoadMask(Ext.getBody(), {msg:"Please wait..."});
         app.mask.show();
-        this.readPortfolioItems();
+        app.loadProjects();
+    },
+
+    loadProjects : function() {
+
+    	var configs = [ {
+			model : "Project",
+    	    fetch : ["Name","ObjectID"],
+        } ];
+
+        async.map(configs,app.wsapiQuery,function(err,results) {
+        	app.projects = results[0];
+	        app.readPortfolioItems();
+        });
+
     },
 
     createConfigForPortfolioType : function(type) {
 
+    	var projects = _.map(app.projects,function(p) { return p.get("ObjectID")});
+
 	    return {
 	        fetch : ['Name','_UnformattedID','ObjectID','_TypeHierarchy','c_STO', '_ItemHierarchy',
-	        			'InvestmentCategory','PortfolioItemType','State','Owner'
+	        			'InvestmentCategory','PortfolioItemType','State','Owner','Project'
 	        		],
 	        hydrate : ['_TypeHierarchy','State','PortfolioItemType','InvestmentCategory'],
 	        pageSize:1000,
 	        find : {
 	            '_TypeHierarchy' : { "$in" : [type]} ,
-	            '_ProjectHierarchy' : { "$in": app.getContext().getProject().ObjectID }, 
+	            'Project' : { "$in": projects }, 
 	            __At : 'current'
 	        },
 
@@ -101,7 +117,21 @@ Ext.define('CustomApp', {
 	    		}
 	    	});
 	    	app.addOwners(features);
+	    	app.addTeamNames(features);
 	    });
+
+    },
+
+    addTeamNames : function(features) {
+
+    	_.each(features,function(f) {
+    		var p = _.find(app.projects,function(pr) { 
+    			return pr.get("ObjectID")=== f.get("Project");
+    		});
+    		f.set("Team",p.get("Name"));
+    	});
+
+    	app.pivotTable(features);
 
     },
 
@@ -142,7 +172,7 @@ Ext.define('CustomApp', {
     			else
     				f.set("OwnerName","");
     		});
-	    	app.pivotTable(features);
+	    	app.addTeamNames(features);
     	});
     },
 
@@ -206,3 +236,4 @@ Ext.define('CustomApp', {
     }
 
 });
+
