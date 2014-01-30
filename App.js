@@ -1,6 +1,6 @@
 var app = null;
 // var types = ["PortfolioItem/Feature","PortfolioItem/Initiative","PortfolioItem/Theme"];
-var types = ["PortfolioItem/Feature"];
+var types = ["PortfolioItem/Feature","PortfolioItem/Initiative"];
 
 Ext.define('CustomApp', {
     extend: 'Rally.app.App',
@@ -47,7 +47,7 @@ Ext.define('CustomApp', {
 
 	    return {
 	        fetch : ['Name','_UnformattedID','ObjectID','_TypeHierarchy','c_STO', '_ItemHierarchy',
-	        			'InvestmentCategory','PortfolioItemType','State','Owner','Project'
+	        			'InvestmentCategory','PortfolioItemType','State','Owner','Project','Parent'
 	        		],
 	        hydrate : ['_TypeHierarchy','State','PortfolioItemType','InvestmentCategory'],
 	        pageSize:1000,
@@ -68,16 +68,30 @@ Ext.define('CustomApp', {
 
         async.mapSeries( configs, app.readSnapshots, function(err,results) {
 
-       		console.log("results",results);
+       		// console.log("results",results);
 
-       		app.addThemesToFeatures(results[0]);
+       		app.addThemesToFeatures(results[0],results[1]);
 
         });
     },
 
-    addThemesToFeatures : function(features) {
+    addThemesToFeatures : function(features,initiatives) {
 
-    	var themeIds = _.map(features,function(f) {
+        console.log("initiatives",initiatives);
+
+        app.addOwners(features);
+        app.addTeamNames(features);
+
+        _.each(features, function(f){
+            // console.log("feature",f);
+            var initiative = _.find( initiatives, function(i) { 
+                //console.log("p",f.get("Parent"),"i",i.get("ObjectID"),f.get("Parent") === i.get("ObjectID"));
+                return f.get("Parent") === i.get("ObjectID");
+            });
+            f.set("Initiative", initiative  ? initiative.get("Name") : "None");
+        });
+
+    	/*var themeIds = _.map(features,function(f) {
     		var ih = f.get("_ItemHierarchy");
     		if (ih.length===3)
     			return ih[0];
@@ -118,7 +132,7 @@ Ext.define('CustomApp', {
 	    	});
 	    	app.addOwners(features);
 	    	app.addTeamNames(features);
-	    });
+	    });*/
 
     },
 
