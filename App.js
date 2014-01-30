@@ -68,8 +68,6 @@ Ext.define('CustomApp', {
 
         async.mapSeries( configs, app.readSnapshots, function(err,results) {
 
-       		// console.log("results",results);
-
        		app.addThemesToFeatures(results[0],results[1]);
 
         });
@@ -83,62 +81,40 @@ Ext.define('CustomApp', {
         app.addTeamNames(features);
 
         _.each(features, function(f){
-            // console.log("feature",f);
             var initiative = _.find( initiatives, function(i) { 
-                //console.log("p",f.get("Parent"),"i",i.get("ObjectID"),f.get("Parent") === i.get("ObjectID"));
                 return f.get("Parent") === i.get("ObjectID");
             });
             f.set("Initiative", initiative  ? initiative.get("Name") : "None");
         });
 
-    	/*var themeIds = _.map(features,function(f) {
-    		var ih = f.get("_ItemHierarchy");
-    		if (ih.length===3)
-    			return ih[0];
-    		else
-    			return null;
-    	});
-    	themeIds = _.compact(themeIds);
-    	themeIds = _.uniq(themeIds);
-    	console.log("distinct themes",themeIds);
 
-	    var themeConfig = {
-	        fetch : ['Name','_UnformattedID','ObjectID','_TypeHierarchy','c_STO', '_ItemHierarchy',
-	        			'InvestmentCategory','PortfolioItemType','State','Owner'
-	        		],
-	        hydrate : ['_TypeHierarchy','State','PortfolioItemType','InvestmentCategory'],
-	        pageSize:1000,
-	        find : {
-	            '_TypeHierarchy' : { "$in" : ["PortfolioItem/Theme"]} ,
-	            // '_ProjectHierarchy' : { "$in": app.getContext().getProject().ObjectID }, 
-	            __At : 'current'
-	        },
-	    };
+    },
 
-	    async.mapSeries( [themeConfig], app.readSnapshots, function(err,results) {
-	    	app.themes = results[0];
+    cleanUpFieldNames : function(features) {
 
-	    	_.each(features,function(f) {
-	    		var th = f.get("_ItemHierarchy");
-    			if (th.length===3) {
-	    			var themeid = th[0];
-	    			var theme = _.find(app.themes, function(t) { 
-	    				return t.get("ObjectID") === themeid; 
-	    			});
-		    		f.set("Theme",theme.get("Name"));
-	    		} else {
-	    			f.set("Theme","");
-	    		}
-	    	});
-	    	app.addOwners(features);
-	    	app.addTeamNames(features);
-	    });*/
+        _.each( features, function(f,i) {
+            var keys = _.keys(f);
+            if (i==0) console.log("keys",keys);
+
+            keys = _.filter(keys,function(k){
+                return k.substring(0,2) === "c_";
+            })
+            // if (i==0) console.log("keys",keys);
+            _.each(keys,function(k){
+                var newKey = k.substring(2);
+                f[newKey] = f[k];
+                delete f[k];
+            });
+
+        })
+
+        return features;
 
     },
 
     addTeamNames : function(features) {
 
-    	_.each(features,function(f) {
+    	_.each( features, function(f) {
     		var p = _.find(app.projects,function(pr) { 
     			return pr.get("ObjectID")=== f.get("Project");
     		});
@@ -196,6 +172,8 @@ Ext.define('CustomApp', {
     	var data = _.map(features,function(s) { 
             return s.data;
         });
+
+        data = app.cleanUpFieldNames(data);
 
         $(app.jqPanel).pivotUI(
             data,                    
