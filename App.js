@@ -56,7 +56,6 @@ Ext.define('CustomApp', {
 	            'Project' : { "$in": projects }, 
 	            __At : 'current'
 	        },
-
 	    }
     },
 
@@ -85,6 +84,8 @@ Ext.define('CustomApp', {
                 return f.get("Parent") === i.get("ObjectID");
             });
             f.set("Initiative", initiative  ? initiative.get("Name") : "None");
+            f.set("Foo", initiative  ? initiative.get("Name") : "None");
+            // console.log("i:",f.get("Initiative"),f.get("Initiative")==undefined,f.get("Initiative")==null);
         });
 
 
@@ -175,14 +176,24 @@ Ext.define('CustomApp', {
 
         data = app.cleanUpFieldNames(data);
 
+        var initDeriver = function(record) {
+            return record.Initiative;
+        };
+
+        var derived = {
+            "Initiative" : initDeriver
+        }   
+
+        console.log("data",data);
+
         $(app.jqPanel).pivotUI(
             data,                    
             {
-                // derivedAttributes : { "Team" : teamNameDeriver, "MonthCompleted" : completedDateDeriver },
+                derivedAttributes : derived,
                 // aggregators : { cycleTime : cycleTime },
-                rows: ["Theme"],
                 cols: ["InvestmentCategory"],
-                hiddenAttributes : ["Owner","ObjectID","_TypeHierarchy","_UnformattedID","_ValidFrom","_ValidTo","PortfolioItemType","_ItemHierarchy"]
+                rows: ["Initiative"],
+                hiddenAttributes : ["Project","Owner","ObjectID","_TypeHierarchy","_UnformattedID","_ValidFrom","_ValidTo","PortfolioItemType","_ItemHierarchy"]
             }
         );
 
