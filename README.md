@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/wrackzone/portfolio-pivot-table.png?label=ready)](https://waffle.io/wrackzone/portfolio-pivot-table)
 portfolio-pivot-table
 =========================
 
