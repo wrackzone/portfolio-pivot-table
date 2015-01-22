@@ -20,8 +20,6 @@ Ext.define('CustomApp', {
 		var panel = Ext.create('Ext.container.Container', {
 					itemId : 'panel',
 					title: 'Hello',
-					// width: 800,
-					// height: 600,
 					html: '<p></p>'
 		});
 
