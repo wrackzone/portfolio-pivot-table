@@ -3,13 +3,160 @@
 <head>
     <title>portfolio-pivot-table</title>
 
-    <script type="text/javascript" src="/apps/2.0rc2/sdk.js"></script>
+    <script type="text/javascript" src="/apps/2.0rc3/sdk.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/async/1.22/async.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
 
     <script type="text/javascript">
         Rally.onReady(function () {
+                (function(){var e,t,n,r,i,s,o,u,a,f,l,c,h,p,d,v,m,g,y=[].slice,b=[].indexOf||function(e){for(var t=0,n=this.length;t<n;t++){if(t in this&&this[t]===e)return t}return-1},w=this,E={}.hasOwnProperty,S=function(e,t){return function(){return e.apply(t,arguments)}};e=jQuery;n=function(e,t,n){var r,i,s,o;e+="";i=e.split(".");s=i[0];o=i.length>1?n+i[1]:"";r=/(\d+)(\d{3})/;while(r.test(s)){s=s.replace(r,"$1"+t+"$2")}return s+o};p=function(e,t,r,i){if(e==null){e=3}if(t==null){t=1}if(r==null){r=","}if(i==null){i="."}return function(s){if(s===0||isNaN(s)||!isFinite(s)){return""}else{return n((t*s).toFixed(e),r,i)}}};r={sum:function(e,t){if(e==null){e=3}if(t==null){t=1}return function(n){var r;r=n[0];return function(){return{sum:0,push:function(e){if(!isNaN(parseFloat(e[r]))){return this.sum+=parseFloat(e[r])}},value:function(){return this.sum},format:p(e,t),label:"Sum of "+r}}}},average:function(e,t){if(e==null){e=3}if(t==null){t=1}return function(n){var r;r=n[0];return function(){return{sum:0,len:0,push:function(e){if(!isNaN(parseFloat(e[r]))){this.sum+=parseFloat(e[r]);return this.len++}},value:function(){return this.sum/this.len},format:p(e,t),label:"Average of "+r}}}},sumOverSum:function(e,t){if(e==null){e=3}if(t==null){t=1}return function(n){var r,i;i=n[0],r=n[1];return function(){return{sumNum:0,sumDenom:0,push:function(e){if(!isNaN(parseFloat(e[i]))){this.sumNum+=parseFloat(e[i])}if(!isNaN(parseFloat(e[r]))){return this.sumDenom+=parseFloat(e[r])}},value:function(){return this.sumNum/this.sumDenom},format:p(e,t),label:""+i+"/"+r}}}},sumOverSumBound80:function(e,t,n){if(e==null){e=3}if(t==null){t=1}if(n==null){n=true}return function(r){var i,s;s=r[0],i=r[1];return function(){return{sumNum:0,sumDenom:0,push:function(e){if(!isNaN(parseFloat(e[s]))){this.sumNum+=parseFloat(e[s])}if(!isNaN(parseFloat(e[i]))){return this.sumDenom+=parseFloat(e[i])}},value:function(){var e;e=n?1:-1;return(.821187207574908/this.sumDenom+this.sumNum/this.sumDenom+1.2815515655446004*e*Math.sqrt(.410593603787454/(this.sumDenom*this.sumDenom)+this.sumNum*(1-this.sumNum/this.sumDenom)/(this.sumDenom*this.sumDenom)))/(1+1.642374415149816/this.sumDenom)},format:p(e,t),label:""+(n?"Upper":"Lower")+" Bound of "+s+"/"+i}}}},fractionOf:function(e,t){if(t==null){t="total"}return function(){var n;n=1<=arguments.length?y.call(arguments,0):[];return function(r,i,s){return{selector:{total:[[],[]],row:[i,[]],col:[[],s]}[t],inner:e.apply(null,n)(r,i,s),push:function(e){return this.inner.push(e)},format:function(e){return p(2)(100*e)+"%"},label:e.apply(null,n)(r,i,s).label+" % of "+t,value:function(){return this.inner.value()/r.getAggregator.apply(r,this.selector).inner.value()}}}}},l10nWrapper:function(e,t,n){return function(){var r;r=1<=arguments.length?y.call(arguments,0):[];return function(i,s,o){return{inner:e.apply(null,r)(i,s,o),push:function(e){return this.inner.push(e)},format:t,label:n(i),value:function(){return this.inner.value()}}}}}};i={count:function(){return function(){return{count:0,push:function(){return this.count++},value:function(){return this.count},format:p(0),label:"Count"}}},countUnique:function(e){var t;t=e[0];return function(){return{uniq:[],push:function(e){var n;if(n=e[t],b.call(this.uniq,n)<0){return this.uniq.push(e[t])}},value:function(){return this.uniq.length},format:p(0),label:"Count Unique "+t}}},listUnique:function(e){var t;t=e[0];return function(){return{uniq:[],push:function(e){var n;if(n=e[t],b.call(this.uniq,n)<0){return this.uniq.push(e[t])}},value:function(){return this.uniq.join(", ")},format:function(e){return e},label:"List Unique "+t}}},intSum:r.sum(0),sum:r.sum(3),average:r.average(3),sumOverSum:r.sumOverSum(3),ub80:r.sumOverSumBound80(3,1,true),lb80:r.sumOverSumBound80(3,1,false)};i.sumAsFractionOfTotal=r.fractionOf(i.sum);i.sumAsFractionOfRow=r.fractionOf(i.sum,"row");i.sumAsFractionOfCol=r.fractionOf(i.sum,"col");i.countAsFractionOfTotal=r.fractionOf(i.count);i.countAsFractionOfRow=r.fractionOf(i.count,"row");i.countAsFractionOfCol=r.fractionOf(i.count,"col");v={Table:function(e,t){return d(e,t)},"Table Barchart":function(e,t){return d(e,t).barchart()},Heatmap:function(e,t){return d(e,t).heatmap()},"Row Heatmap":function(e,t){return d(e,t).heatmap("rowheatmap")},"Col Heatmap":function(e,t){return d(e,t).heatmap("colheatmap")}};c=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];o=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];g=function(e){return("0"+e).substr(-2,2)};a={bin:function(e,t){return function(n){return n[e]-n[e]%t}},dateFormat:function(e,t){return function(n){var r;r=new Date(Date.parse(n[e]));if(isNaN(r)){return""}return t.replace(/%(.)/g,function(e,t){switch(t){case"y":return r.getFullYear();case"m":return g(r.getMonth()+1);case"n":return c[r.getMonth()];case"d":return g(r.getDate());case"w":return o[r.getDay()];case"x":return r.getDay();case"H":return g(r.getHours());case"M":return g(r.getMinutes());case"S":return g(r.getSeconds());default:return"%"+t}})}}};h=function(e,t){var n,r,i,s,o,u,a;u=/(\d+)|(\D+)/g;o=/\d/;a=/^0/;if(typeof e==="number"||typeof t==="number"){if(isNaN(e)){return 1}if(isNaN(t)){return-1}return e-t}n=String(e).toLowerCase();i=String(t).toLowerCase();if(n===i){return 0}if(!(o.test(n)&&o.test(i))){return n>i?1:-1}n=n.match(u);i=i.match(u);while(n.length&&i.length){r=n.shift();s=i.shift();if(r!==s){if(o.test(r)&&o.test(s)){return r.replace(a,".0")-s.replace(a,".0")}else{return r>s?1:-1}}}return n.length-i.length};e.pivotUtilities={aggregatorTemplates:r,aggregators:i,renderers:v,derivers:a,naturalSort:h,numberFormat:p};u=function(e,t,n){var r,i,s;for(r in t){i=t[r];e[r]=(s=i(e))!=null?s:e[r]}for(r in e){if(!E.call(e,r))continue;if(e[r]==null){e[r]="null"}}return n(e)};f=function(t,n,r){var i,s,o,a,f,l,c,h,p,d,v,m;i=function(e){return u(e,n,r)};if(e.isFunction(t)){return t(i)}else if(e.isArray(t)){if(e.isArray(t[0])){v=[];for(o in t){if(!E.call(t,o))continue;s=t[o];if(!(o>0)){continue}l={};d=t[0];for(a in d){if(!E.call(d,a))continue;f=d[a];l[f]=s[a]}v.push(i(l))}return v}else{m=[];for(h=0,p=t.length;h<p;h++){l=t[h];m.push(i(l))}return m}}else if(t instanceof jQuery){c=[];e("thead > tr > th",t).each(function(t){return c.push(e(this).text())});return e("tbody > tr",t).each(function(t){l={};e("td",this).each(function(t){return l[c[t]]=e(this).text()});return i(l)})}else{throw new Error("unknown input format")}};s=function(e){var t;t=[];f(e,{},function(e){return t.push(e)});return t};t=function(){function e(e,t,n){this.aggregator=e;this.colAttrs=t;this.rowAttrs=n;this.getAggregator=S(this.getAggregator,this);this.flattenKey=S(this.flattenKey,this);this.getRowKeys=S(this.getRowKeys,this);this.getColKeys=S(this.getColKeys,this);this.sortKeys=S(this.sortKeys,this);this.arrSort=S(this.arrSort,this);this.natSort=S(this.natSort,this);this.tree={};this.rowKeys=[];this.colKeys=[];this.flatRowKeys=[];this.flatColKeys=[];this.rowTotals={};this.colTotals={};this.allTotal=this.aggregator(this,[],[]);this.sorted=false}e.prototype.natSort=function(e,t){return h(e,t)};e.prototype.arrSort=function(e,t){return this.natSort(e.join(),t.join())};e.prototype.sortKeys=function(){if(!this.sorted){this.rowKeys.sort(this.arrSort);this.colKeys.sort(this.arrSort)}return this.sorted=true};e.prototype.getColKeys=function(){this.sortKeys();return this.colKeys};e.prototype.getRowKeys=function(){this.sortKeys();return this.rowKeys};e.prototype.flattenKey=function(e){return e.join(String.fromCharCode(0))};e.prototype.processRecord=function(e){var t,n,r,i,s;t=function(){var t,n,r,i;r=this.colAttrs;i=[];for(t=0,n=r.length;t<n;t++){s=r[t];i.push(e[s])}return i}.call(this);i=function(){var t,n,r,i;r=this.rowAttrs;i=[];for(t=0,n=r.length;t<n;t++){s=r[t];i.push(e[s])}return i}.call(this);r=this.flattenKey(i);n=this.flattenKey(t);this.allTotal.push(e);if(i.length!==0){if(b.call(this.flatRowKeys,r)<0){this.rowKeys.push(i);this.flatRowKeys.push(r)}if(!this.rowTotals[r]){this.rowTotals[r]=this.aggregator(this,i,[])}this.rowTotals[r].push(e)}if(t.length!==0){if(b.call(this.flatColKeys,n)<0){this.colKeys.push(t);this.flatColKeys.push(n)}if(!this.colTotals[n]){this.colTotals[n]=this.aggregator(this,[],t)}this.colTotals[n].push(e)}if(t.length!==0&&i.length!==0){if(!(r in this.tree)){this.tree[r]={}}if(!(n in this.tree[r])){this.tree[r][n]=this.aggregator(this,i,t)}return this.tree[r][n].push(e)}};e.prototype.getAggregator=function(e,t){var n,r,i;i=this.flattenKey(e);r=this.flattenKey(t);if(e.length===0&&t.length===0){n=this.allTotal}else if(e.length===0){n=this.colTotals[r]}else if(t.length===0){n=this.rowTotals[i]}else{n=this.tree[i][r]}return n!=null?n:{value:function(){return null},format:function(){return""}}};return e}();l=function(e,n,r,i,s,o){var u;u=new t(i,n,r);f(e,o,function(e){if(s(e)){return u.processRecord(e)}});return u};m=function(e,t,n){var r,i,s,o,u,a;if(t!==0){i=true;for(o=u=0;0<=n?u<=n:u>=n;o=0<=n?++u:--u){if(e[t-1][o]!==e[t][o]){i=false}}if(i){return-1}}r=0;while(t+r<e.length){s=false;for(o=a=0;0<=n?a<=n:a>=n;o=0<=n?++a:--a){if(e[t][o]!==e[t+r][o]){s=true}}if(s){break}r++}return r};d=function(t,n){var r,i,s,o,u,a,f,l,c,h,p,d,v,g,y,b,w,S,x;a={localeStrings:{totals:"Totals"}};n=e.extend(a,n);s=t.colAttrs;p=t.rowAttrs;v=t.getRowKeys();u=t.getColKeys();h=e("<table class='table table-bordered pvtTable'>");for(l in s){if(!E.call(s,l))continue;i=s[l];b=e("<tr>");if(parseInt(l)===0&&p.length!==0){b.append(e("<th>").attr("colspan",p.length).attr("rowspan",s.length))}b.append(e("<th class='pvtAxisLabel'>").text(i));for(f in u){if(!E.call(u,f))continue;o=u[f];x=m(u,parseInt(f),parseInt(l));if(x!==-1){g=e("<th class='pvtColLabel'>").text(o[l]).attr("colspan",x);if(parseInt(l)===s.length-1&&p.length!==0){g.attr("rowspan",2)}b.append(g)}}if(parseInt(l)===0){b.append(e("<th class='pvtTotalLabel'>").text(n.localeStrings.totals).attr("rowspan",s.length+(p.length===0?0:1)))}h.append(b)}if(p.length!==0){b=e("<tr>");for(f in p){if(!E.call(p,f))continue;c=p[f];b.append(e("<th class='pvtAxisLabel'>").text(c))}g=e("<th>");if(s.length===0){g.addClass("pvtTotalLabel").text(n.localeStrings.totals)}b.append(g);h.append(b)}for(f in v){if(!E.call(v,f))continue;d=v[f];b=e("<tr>");for(l in d){if(!E.call(d,l))continue;w=d[l];x=m(v,parseInt(f),parseInt(l));if(x!==-1){g=e("<th class='pvtRowLabel'>").text(w).attr("rowspan",x);if(parseInt(l)===p.length-1&&s.length!==0){g.attr("colspan",2)}b.append(g)}}for(l in u){if(!E.call(u,l))continue;o=u[l];r=t.getAggregator(d,o);S=r.value();b.append(e("<td class='pvtVal row"+f+" col"+l+"'>").html(r.format(S)).data("value",S))}y=t.getAggregator(d,[]);S=y.value();b.append(e("<td class='pvtTotal rowTotal'>").html(y.format(S)).data("value",S).data("for","row"+f));h.append(b)}b=e("<tr>");g=e("<th class='pvtTotalLabel'>").text(n.localeStrings.totals);g.attr("colspan",p.length+(s.length===0?0:1));b.append(g);for(l in u){if(!E.call(u,l))continue;o=u[l];y=t.getAggregator([],o);S=y.value();b.append(e("<td class='pvtTotal colTotal'>").html(y.format(S)).data("value",S).data("for","col"+l))}y=t.getAggregator([],[]);S=y.value();b.append(e("<td class='pvtGrandTotal'>").html(y.format(S)).data("value",S));h.append(b);h.data("dimensions",[v.length,u.length]);return h};e.fn.pivot=function(t,n){var r,s,o,u;r={cols:[],rows:[],filter:function(){return true},aggregator:i.count(),derivedAttributes:{},renderer:d,rendererOptions:null,localeStrings:{renderError:"An error occurred rendering the PivotTable results.",computeError:"An error occurred computing the PivotTable results."}};n=e.extend(r,n);u=null;try{o=l(t,n.cols,n.rows,n.aggregator,n.filter,n.derivedAttributes);try{u=n.renderer(o,n.rendererOptions)}catch(a){s=a;if(typeof console!=="undefined"&&console!==null){console.error(s.stack)}u=n.localeStrings.renderError}}catch(a){s=a;if(typeof console!=="undefined"&&console!==null){console.error(s.stack)}u=n.localeStrings.computeError}this.html(u);return this};e.fn.pivotUI=function(t,n,r){var o,u,a,l,c,p,d,m,g,y,w,S,x,T,N,C,k,L,A,O,M,_,D,P,H,B,j,F,I,q,R,U,z,W,X,V,J=this;if(r==null){r=false}c={derivedAttributes:{},aggregators:i,renderers:v,hiddenAttributes:[],menuLimit:200,cols:[],rows:[],vals:[],exclusions:{},unusedAttrsVertical:false,autoSortUnusedAttrs:false,rendererOptions:null,onRefresh:null,filter:function(){return true},localeStrings:{renderError:"An error occurred rendering the PivotTable results.",computeError:"An error occurred computing the PivotTable results.",uiRenderError:"An error occurred rendering the PivotTable UI.",selectAll:"Select All",selectNone:"Select None",tooMany:"(too many to list)"}};d=this.data("pivotUIOptions");if(d==null||r){y=e.extend(c,n)}else{y=d}try{t=s(t);k=function(){var e,n;e=t[0];n=[];for(g in e){if(!E.call(e,g))continue;n.push(g)}return n}();R=y.derivedAttributes;for(a in R){if(!E.call(R,a))continue;if(b.call(k,a)<0){k.push(a)}}u={};for(D=0,j=k.length;D<j;D++){M=k[D];u[M]={}}f(t,y.derivedAttributes,function(e){var t,n,r;r=[];for(g in e){if(!E.call(e,g))continue;t=e[g];if(t==null){t="null"}if((n=u[g])[t]==null){n[t]=0}r.push(u[g][t]++)}return r});O=e("<table class='table table-bordered' cellpadding='5'>");N=e("<td>");T=e("<select class='pvtRenderer'>").bind("change",function(){return S()});U=y.renderers;for(M in U){if(!E.call(U,M))continue;T.append(e("<option>").val(M).text(M))}N.append(T);l=e("<td class='pvtAxisContainer pvtUnused'>");if(y.unusedAttrsVertical){l.addClass("pvtVertList")}else{l.addClass("pvtHorizList")}C=function(){var e,t,n;n=[];for(e=0,t=k.length;e<t;e++){a=k[e];if(b.call(y.hiddenAttributes,a)<0){n.push(a)}}return n}();_=function(t){var n,r,i,s,o,a,f,c,p,d,v,w,E,x,T;f=function(){var e;e=[];for(g in u[t]){e.push(g)}return e}();a=false;w=e("<div>").addClass("pvtFilterBox").css({"z-index":100,width:"280px",border:"1px solid gray",background:"white",display:"none",position:"absolute",padding:"20px"});w.append(e("<div>").css({"text-align":"center","font-weight":"bold"}).text(""+t+" ("+f.length+")"));if(f.length>y.menuLimit){w.append(e("<p>").css({"text-align":"center"}).text(y.localeStrings.tooMany))}else{r=e("<p>").css({"text-align":"center","margin-bottom":"5px"});r.append(e("<button>").text(y.localeStrings.selectAll).bind("click",function(){return w.find("input").prop("checked",true)}));r.append(e("<button>").text(y.localeStrings.selectNone).bind("click",function(){return w.find("input").prop("checked",false)}));w.append(r);i=e("<div>").css({overflow:"scroll",width:"280px","max-height":"200px"});T=f.sort(h);for(E=0,x=T.length;E<x;E++){g=T[E];v=u[t][g];s=e("<label>");o=y.exclusions[t]?b.call(y.exclusions[t],g)>=0:false;a||(a=o);s.append(e("<input type='checkbox' class='pvtFilter'>").attr("checked",!o).data("filter",[t,g]));s.append(e("<span>").text(""+g+" ("+v+")"));i.append(e("<p>").css("margin","5px").append(s))}w.append(i)}d=function(){var t;t=e(w).find("[type='checkbox']").length-e(w).find("[type='checkbox']:checked").length;if(t>0){n.addClass("pvtFilteredAttribute")}else{n.removeClass("pvtFilteredAttribute")}if(f.length>y.menuLimit){return w.toggle()}else{return w.toggle(0,S)}};w.append(e("<p>").css({"text-align":"center","margin-bottom":0}).append(e("<button>").text("OK").bind("click",d)));c=function(e){return w.css({left:e.pageX,top:e.pageY}).toggle()};p=e("<span class='pvtTriangle'>").html(" &#x25BE;").bind("click",c);n=e("<li class='label label-info axis_"+m+"'>").append(e("<nobr>").text(t).data("attrName",t).append(p));if(a){n.addClass("pvtFilteredAttribute")}l.append(n).append(w);return n.bind("dblclick",c)};for(m in C){a=C[m];_(a)}L=e("<tr>");o=e("<select class='pvtAggregator'>").css("margin-bottom","5px").bind("change",function(){return S()});z=y.aggregators;for(M in z){if(!E.call(z,M))continue;o.append(e("<option>").val(M).text(M))}L.append(e("<td class='pvtAxisContainer pvtHorizList pvtVals'>").css("text-align","center").append(o).append(e("<br>")));L.append(e("<td class='pvtAxisContainer pvtHorizList pvtCols'>"));O.append(L);A=e("<tr>");A.append(e("<td valign='top' class='pvtAxisContainer pvtRows'>"));w=e("<td valign='top' class='pvtRendererArea'>");A.append(w);O.append(A);if(y.unusedAttrsVertical){O.find("tr:nth-child(1)").prepend(N);O.find("tr:nth-child(2)").prepend(l.css("vertical-align","top"))}else{O.prepend(e("<tr>").append(N).append(l))}this.html(O);W=y.cols;for(P=0,F=W.length;P<F;P++){M=W[P];this.find(".pvtCols").append(this.find(".axis_"+C.indexOf(M)))}X=y.rows;for(H=0,I=X.length;H<I;H++){M=X[H];this.find(".pvtRows").append(this.find(".axis_"+C.indexOf(M)))}V=y.vals;for(B=0,q=V.length;B<q;B++){M=V[B];this.find(".pvtVals").append(this.find(".axis_"+C.indexOf(M)))}if(y.aggregatorName!=null){this.find(".pvtAggregator").val(y.aggregatorName)}if(y.rendererName!=null){this.find(".pvtRenderer").val(y.rendererName)}x=function(){var n,r,i,s,u;i={derivedAttributes:y.derivedAttributes,localeStrings:y.localeStrings,rendererOptions:y.rendererOptions,cols:[],rows:[]};u=[];J.find(".pvtRows li nobr").each(function(){return i.rows.push(e(this).data("attrName"))});J.find(".pvtCols li nobr").each(function(){return i.cols.push(e(this).data("attrName"))});J.find(".pvtVals li nobr").each(function(){return u.push(e(this).data("attrName"))});i.aggregator=y.aggregators[o.val()](u);i.renderer=y.renderers[T.val()];n={};J.find("input.pvtFilter").not(":checked").each(function(){var t;t=e(this).data("filter");console.log(t);if(n[t[0]]!=null){return n[t[0]].push(t[1])}else{return n[t[0]]=[t[1]]}});i.filter=function(e){var t,r;if(!y.filter(e)){return false}for(g in n){t=n[g];if(r=""+e[g],b.call(t,r)>=0){return false}}return true};w.pivot(t,i);J.data("pivotUIOptions",{cols:i.cols,rows:i.rows,vals:u,exclusions:n,hiddenAttributes:y.hiddenAttributes,renderers:y.renderers,aggregators:y.aggregators,filter:y.filter,derivedAttributes:y.derivedAttributes,aggregatorName:o.val(),rendererName:T.val(),localeStrings:y.localeStrings,rendererOptions:y.rendererOptions});if(y.autoSortUnusedAttrs){r=e.pivotUtilities.naturalSort;s=J.find("td.pvtUnused.pvtAxisContainer");e(s).children("li").sort(function(t,n){return r(e(t).text(),e(n).text())}).appendTo(s)}w.css("opacity",1);if(y.onRefresh!=null){return y.onRefresh()}};S=function(){w.css("opacity",.5);return setTimeout(x,10)};S();this.find(".pvtAxisContainer").sortable({update:S,connectWith:this.find(".pvtAxisContainer"),items:"li",placeholder:"placeholder"})}catch(K){p=K;if(typeof console!=="undefined"&&console!==null){console.error(p.stack)}this.html(y.localeStrings.uiRenderError)}return this};e.fn.heatmap=function(t){var n,r,i,s,o,u,a,f,l,c=this;if(t==null){t="heatmap"}l=this.data("dimensions"),u=l[0],o=l[1];n=function(e,t,n){var r;r=function(){switch(e){case"red":return function(e){return"ff"+e+e};case"green":return function(e){return""+e+"ff"+e};case"blue":return function(e){return""+e+e+"ff"}}}();return function(e){var i,s;s=255-Math.round(255*(e-t)/(n-t));i=s.toString(16).split(".")[0];if(i.length===1){i=0+i}return r(i)}};r=function(t,r){var i,s,o;s=function(n){return c.find(t).each(function(){var t;t=e(this).data("value");if(t!=null&&isFinite(t)){return n(t,e(this))}})};o=[];s(function(e){return o.push(e)});i=n(r,Math.min.apply(Math,o),Math.max.apply(Math,o));return s(function(e,t){return t.css("background-color","#"+i(e))})};switch(t){case"heatmap":r(".pvtVal","red");break;case"rowheatmap":for(i=a=0;0<=u?a<u:a>u;i=0<=u?++a:--a){r(".pvtVal.row"+i,"red")}break;case"colheatmap":for(s=f=0;0<=o?f<o:f>o;s=0<=o?++f:--f){r(".pvtVal.col"+s,"red")}}r(".pvtTotal.rowTotal","red");r(".pvtTotal.colTotal","red");return this};e.fn.barchart=function(){var t,n,r,i,s,o,u=this;o=this.data("dimensions"),i=o[0],r=o[1];t=function(t){var n,r,i,s;n=function(n){return u.find(t).each(function(){var t;t=e(this).data("value");if(t!=null&&isFinite(t)){return n(t,e(this))}})};s=[];n(function(e){return s.push(e)});r=Math.max.apply(Math,s);i=function(e){return 100*e/(1.4*r)};return n(function(t,n){var r,s;r=n.text();s=e("<div>").css({position:"relative",height:"55px"});s.append(e("<div>").css({position:"absolute",bottom:0,left:0,right:0,height:i(t)+"%","background-color":"gray"}));s.append(e("<div>").text(r).css({position:"relative","padding-left":"5px","padding-right":"5px"}));return n.css({padding:0,"padding-top":"5px","text-align":"center"}).html(s)})};for(n=s=0;0<=i?s<i:s>i;n=0<=i?++s:--s){t(".pvtVal.row"+n)}t(".pvtTotal.colTotal");return this}}).call(this)
+                /** this class is configured with { series : [] } where series is a single dimensional array of 
+    data values that is filled to full extent of the date range with future values filled with 
+    nulls.
+**/
+Ext.define("FeatureRollUp", function() {
+
+    var self;
+
+    return {
+        config : {
+                type : '',
+                fields : [],
+                operation : '',
+                attrName : '',
+                aggregator : null
+        },
+
+        constructor:function(config) {
+            self = this;
+            this.initConfig(config);
+            console.log("attr:",self.attrName);
+            return this;
+        },
+
+        fillFeatures : function( features, callback ) {
+
+            var that = this;
+
+            var configs = _.map( features, function(feature) {
+                return { 
+                    feature : feature.get("ObjectID"), 
+                    type : that.type,
+                    fields : that.fields,
+                    operation : that.operation,
+                    attrName : that.attrName
+                };
+            });
+
+            async.map(configs, that.rollUp, function(error,result) {
+                console.log("AttrName",that.attrName);
+                _.each(features,function(feature,i) {
+                    feature.set(that.attrName,result[i]);
+                });
+                callback(null,true);
+            });
+
+        },
+
+        rollUp : function( config, callback ) {
+        
+            var hydrate = ['_TypeHierarchy'];
+            var cfg = {
+                find : {
+                    '_TypeHierarchy' : { "$in" : [config.type] },
+                    '_ItemHierarchy' : { "$in" : [config.feature] },
+                    __At : 'current'
+                },
+                hydrate : hydrate,
+                fetch : hydrate.concat(config.fields)
+            };
+
+            self.readSnapshots(cfg, function(error,snapshots) {
+                var totals = _.map( config.fields, function(f) {
+                    return _.reduce( snapshots, function(memo,s) {
+                        var val = null; var fv = s.get(f) ? parseFloat(s.get(f)) : 0;
+                        switch( config.operation ) {
+                            case 'sum': 
+                                val = memo + fv;
+                                break;
+                            case 'count':
+                                val = memo + 1;
+                        };
+                        return val;
+                    },0);
+                });
+                callback(null,_.zipObject(config.fields,totals));
+            });
+        },
+
+        readSnapshots : function( config, callback) {
+            var storeConfig = {
+                find : config.find,
+                autoLoad : true,
+                pageSize:1000,
+                limit: 'Infinity',
+                fetch: config.fetch,
+                hydrate: config.hydrate,
+                listeners : {
+                    scope : this,
+                    load: function(store, snapshots, success) {
+                        callback(null,snapshots);
+                    }
+                }
+            };
+            var snapshotStore = Ext.create('Rally.data.lookback.SnapshotStore', storeConfig);
+        }
+
+
+    };  
+});
+
+                //aggregator : function() {
+var aggregator =  function(attrName) {
+
+    return function() {
+
+        var _attrName = attrName;
+
+        return function(x,y,z) {
+            var xx = x;
+            var yy = y;
+            var zz = z;
+            
+            return {
+                recs : [],
+                push: function(record) {
+                    this.recs.push(record);
+                },
+                value: function() {
+                    var that = this;
+                    if (this.recs.length<=0)
+                        return null;
+                    var first = _.first(this.recs);
+                    var keys = _.keys(first[_attrName]);
+                    var vals = _.map(keys,function(key) {
+                        var recVals = _.map(that.recs , function(rec) { 
+                            return rec[_attrName][key]
+                        });
+                        return _.reduce( recVals ,
+                            function(memo,val) {
+                                return memo + (val ? val : 0);
+                        }, 0 );
+                    });
+                    return _.zipObject(keys,vals);
+                },
+                format: function(val) { 
+                    return "<table>" + 
+                    "<tr><td>"+_.keys(val).join("</td><td>") + "</td></tr>" +
+                    "<tr><td>"+_.values(val).join("</td><td>") + "</td></tr>" +
+                    "</table>"
+                },
+                label: _attrName
+            };
+        };
+    };
+};
                 var app = null;
 // var types = ["PortfolioItem/Feature","PortfolioItem/Initiative","PortfolioItem/Theme"];
 var types = ["PortfolioItem/Feature","PortfolioItem/Initiative"];
@@ -28,6 +175,25 @@ Ext.define('CustomApp', {
 	launch: function() {
 		//Write app code here
 		app = this;
+
+		app.taskSummary = Ext.create("FeatureRollUp", {
+            type : 'Task',
+            fields : ["Estimate","ToDo"],
+            operation : 'sum',
+            attrName : 'TaskSummary',
+            aggregator : aggregator("TaskSummary")
+		});
+
+		app.defectSummary = Ext.create("FeatureRollUp", {
+            type : 'Defect',
+            fields : ["FormattedID"],
+            operation : 'count',
+            attrName : 'DefectSummary',
+            aggregator : aggregator("DefectSummary")
+		});
+
+		console.log(app.taskSummary.attrName,
+			app.defectSummary.attrName);
 
 		var panel = Ext.create('Ext.container.Container', {
 					itemId : 'panel',
@@ -81,9 +247,10 @@ Ext.define('CustomApp', {
 
 		return {
 			fetch : ['Name','_UnformattedID','ObjectID','_TypeHierarchy','c_STO', '_ItemHierarchy',
-						'InvestmentCategory','PortfolioItemType','State','Owner','Project','Parent'
+						'InvestmentCategory','PortfolioItemType','State','Owner','Project','Parent',
+						'Release','FormattedID'
 					],
-			hydrate : ['_TypeHierarchy','State','PortfolioItemType','InvestmentCategory'],
+			hydrate : ['_TypeHierarchy','State','PortfolioItemType','InvestmentCategory','Release'],
 			pageSize:1000,
 			find : {
 				'_TypeHierarchy' : { "$in" : [type]} ,
@@ -100,9 +267,7 @@ Ext.define('CustomApp', {
 		});
 
 		async.mapSeries( configs, app.readSnapshots, function(err,results) {
-
 			app.addThemesToFeatures(results[0],results[1]);
-
 		});
 	},
 
@@ -118,6 +283,12 @@ Ext.define('CustomApp', {
 			f.set("Initiative", initiative  ? initiative.get("Name") : "None");
 		});
 
+		app.taskSummary.fillFeatures(features,function(error,success) {
+			app.defectSummary.fillFeatures(features,function(error,success) {
+				console.log("success",success,features);
+				app.pivotTable(features);
+			});
+		});
 
 	},
 
@@ -149,7 +320,7 @@ Ext.define('CustomApp', {
 			f.set("Team",p.get("Name"));
 		});
 
-		app.pivotTable(features);
+		
 
 	},
 
@@ -190,6 +361,18 @@ Ext.define('CustomApp', {
 		});
 	},
 
+	addCommas : function(nStr) {
+            var rgx, x, x1, x2;
+            nStr += '';
+            x = nStr.split('.');
+            x1 = x[0];
+            x2 = x.length > 1 ? '.' + x[1] : '';
+            rgx = /(\d+)(\d{3})/;
+            while (rgx.test(x1)) {
+              x1 = x1.replace(rgx, '$1' + ',' + '$2');
+            }
+            return x1 + x2;
+    },
 
 	pivotTable : function(features) {
 
@@ -209,21 +392,24 @@ Ext.define('CustomApp', {
 		var ownerDeriver = function(record) {
 			return record.OwnerName;
 		};
-
+		var releaseDeriver = function(record) {
+			return record.Release.Name;
+		};
 
 		var derived = {
 			"Initiative" : initDeriver,
-			"OwnerName" : ownerDeriver
+			"OwnerName" : ownerDeriver,
+			"Release" : releaseDeriver
 		};   
-
 
 		$(app.jqPanel).pivotUI(
 			data,                    
 			{
 				derivedAttributes : derived,
-				// aggregators : { cycleTime : cycleTime },
-				// cols: ["InvestmentCategory"],
-				// rows: ["Initiative"],
+				aggregators : { 
+					taskSummary : app.taskSummary.aggregator,
+				 	defectSummary : app.defectSummary.aggregator
+				},
 				cols: cols,
 				rows: rows,
 				hiddenAttributes : ["Project","Owner","ObjectID","_TypeHierarchy","_UnformattedID","_ValidFrom","_ValidTo","PortfolioItemType","_ItemHierarchy"]
@@ -273,7 +459,6 @@ Ext.define('CustomApp', {
 });
 
 
-                (function(){var e,t,n,r,i,s,o,u,a,f,l,c,h,p,d,v,m,g,y=[].slice,b=[].indexOf||function(e){for(var t=0,n=this.length;t<n;t++){if(t in this&&this[t]===e)return t}return-1},w=this,E={}.hasOwnProperty,S=function(e,t){return function(){return e.apply(t,arguments)}};e=jQuery;n=function(e,t,n){var r,i,s,o;e+="";i=e.split(".");s=i[0];o=i.length>1?n+i[1]:"";r=/(\d+)(\d{3})/;while(r.test(s)){s=s.replace(r,"$1"+t+"$2")}return s+o};p=function(e,t,r,i){if(e==null){e=3}if(t==null){t=1}if(r==null){r=","}if(i==null){i="."}return function(s){if(s===0||isNaN(s)||!isFinite(s)){return""}else{return n((t*s).toFixed(e),r,i)}}};r={sum:function(e,t){if(e==null){e=3}if(t==null){t=1}return function(n){var r;r=n[0];return function(){return{sum:0,push:function(e){if(!isNaN(parseFloat(e[r]))){return this.sum+=parseFloat(e[r])}},value:function(){return this.sum},format:p(e,t),label:"Sum of "+r}}}},average:function(e,t){if(e==null){e=3}if(t==null){t=1}return function(n){var r;r=n[0];return function(){return{sum:0,len:0,push:function(e){if(!isNaN(parseFloat(e[r]))){this.sum+=parseFloat(e[r]);return this.len++}},value:function(){return this.sum/this.len},format:p(e,t),label:"Average of "+r}}}},sumOverSum:function(e,t){if(e==null){e=3}if(t==null){t=1}return function(n){var r,i;i=n[0],r=n[1];return function(){return{sumNum:0,sumDenom:0,push:function(e){if(!isNaN(parseFloat(e[i]))){this.sumNum+=parseFloat(e[i])}if(!isNaN(parseFloat(e[r]))){return this.sumDenom+=parseFloat(e[r])}},value:function(){return this.sumNum/this.sumDenom},format:p(e,t),label:""+i+"/"+r}}}},sumOverSumBound80:function(e,t,n){if(e==null){e=3}if(t==null){t=1}if(n==null){n=true}return function(r){var i,s;s=r[0],i=r[1];return function(){return{sumNum:0,sumDenom:0,push:function(e){if(!isNaN(parseFloat(e[s]))){this.sumNum+=parseFloat(e[s])}if(!isNaN(parseFloat(e[i]))){return this.sumDenom+=parseFloat(e[i])}},value:function(){var e;e=n?1:-1;return(.821187207574908/this.sumDenom+this.sumNum/this.sumDenom+1.2815515655446004*e*Math.sqrt(.410593603787454/(this.sumDenom*this.sumDenom)+this.sumNum*(1-this.sumNum/this.sumDenom)/(this.sumDenom*this.sumDenom)))/(1+1.642374415149816/this.sumDenom)},format:p(e,t),label:""+(n?"Upper":"Lower")+" Bound of "+s+"/"+i}}}},fractionOf:function(e,t){if(t==null){t="total"}return function(){var n;n=1<=arguments.length?y.call(arguments,0):[];return function(r,i,s){return{selector:{total:[[],[]],row:[i,[]],col:[[],s]}[t],inner:e.apply(null,n)(r,i,s),push:function(e){return this.inner.push(e)},format:function(e){return p(2)(100*e)+"%"},label:e.apply(null,n)(r,i,s).label+" % of "+t,value:function(){return this.inner.value()/r.getAggregator.apply(r,this.selector).inner.value()}}}}},l10nWrapper:function(e,t,n){return function(){var r;r=1<=arguments.length?y.call(arguments,0):[];return function(i,s,o){return{inner:e.apply(null,r)(i,s,o),push:function(e){return this.inner.push(e)},format:t,label:n(i),value:function(){return this.inner.value()}}}}}};i={count:function(){return function(){return{count:0,push:function(){return this.count++},value:function(){return this.count},format:p(0),label:"Count"}}},countUnique:function(e){var t;t=e[0];return function(){return{uniq:[],push:function(e){var n;if(n=e[t],b.call(this.uniq,n)<0){return this.uniq.push(e[t])}},value:function(){return this.uniq.length},format:p(0),label:"Count Unique "+t}}},listUnique:function(e){var t;t=e[0];return function(){return{uniq:[],push:function(e){var n;if(n=e[t],b.call(this.uniq,n)<0){return this.uniq.push(e[t])}},value:function(){return this.uniq.join(", ")},format:function(e){return e},label:"List Unique "+t}}},intSum:r.sum(0),sum:r.sum(3),average:r.average(3),sumOverSum:r.sumOverSum(3),ub80:r.sumOverSumBound80(3,1,true),lb80:r.sumOverSumBound80(3,1,false)};i.sumAsFractionOfTotal=r.fractionOf(i.sum);i.sumAsFractionOfRow=r.fractionOf(i.sum,"row");i.sumAsFractionOfCol=r.fractionOf(i.sum,"col");i.countAsFractionOfTotal=r.fractionOf(i.count);i.countAsFractionOfRow=r.fractionOf(i.count,"row");i.countAsFractionOfCol=r.fractionOf(i.count,"col");v={Table:function(e,t){return d(e,t)},"Table Barchart":function(e,t){return d(e,t).barchart()},Heatmap:function(e,t){return d(e,t).heatmap()},"Row Heatmap":function(e,t){return d(e,t).heatmap("rowheatmap")},"Col Heatmap":function(e,t){return d(e,t).heatmap("colheatmap")}};c=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];o=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];g=function(e){return("0"+e).substr(-2,2)};a={bin:function(e,t){return function(n){return n[e]-n[e]%t}},dateFormat:function(e,t){return function(n){var r;r=new Date(Date.parse(n[e]));if(isNaN(r)){return""}return t.replace(/%(.)/g,function(e,t){switch(t){case"y":return r.getFullYear();case"m":return g(r.getMonth()+1);case"n":return c[r.getMonth()];case"d":return g(r.getDate());case"w":return o[r.getDay()];case"x":return r.getDay();case"H":return g(r.getHours());case"M":return g(r.getMinutes());case"S":return g(r.getSeconds());default:return"%"+t}})}}};h=function(e,t){var n,r,i,s,o,u,a;u=/(\d+)|(\D+)/g;o=/\d/;a=/^0/;if(typeof e==="number"||typeof t==="number"){if(isNaN(e)){return 1}if(isNaN(t)){return-1}return e-t}n=String(e).toLowerCase();i=String(t).toLowerCase();if(n===i){return 0}if(!(o.test(n)&&o.test(i))){return n>i?1:-1}n=n.match(u);i=i.match(u);while(n.length&&i.length){r=n.shift();s=i.shift();if(r!==s){if(o.test(r)&&o.test(s)){return r.replace(a,".0")-s.replace(a,".0")}else{return r>s?1:-1}}}return n.length-i.length};e.pivotUtilities={aggregatorTemplates:r,aggregators:i,renderers:v,derivers:a,naturalSort:h,numberFormat:p};u=function(e,t,n){var r,i,s;for(r in t){i=t[r];e[r]=(s=i(e))!=null?s:e[r]}for(r in e){if(!E.call(e,r))continue;if(e[r]==null){e[r]="null"}}return n(e)};f=function(t,n,r){var i,s,o,a,f,l,c,h,p,d,v,m;i=function(e){return u(e,n,r)};if(e.isFunction(t)){return t(i)}else if(e.isArray(t)){if(e.isArray(t[0])){v=[];for(o in t){if(!E.call(t,o))continue;s=t[o];if(!(o>0)){continue}l={};d=t[0];for(a in d){if(!E.call(d,a))continue;f=d[a];l[f]=s[a]}v.push(i(l))}return v}else{m=[];for(h=0,p=t.length;h<p;h++){l=t[h];m.push(i(l))}return m}}else if(t instanceof jQuery){c=[];e("thead > tr > th",t).each(function(t){return c.push(e(this).text())});return e("tbody > tr",t).each(function(t){l={};e("td",this).each(function(t){return l[c[t]]=e(this).text()});return i(l)})}else{throw new Error("unknown input format")}};s=function(e){var t;t=[];f(e,{},function(e){return t.push(e)});return t};t=function(){function e(e,t,n){this.aggregator=e;this.colAttrs=t;this.rowAttrs=n;this.getAggregator=S(this.getAggregator,this);this.flattenKey=S(this.flattenKey,this);this.getRowKeys=S(this.getRowKeys,this);this.getColKeys=S(this.getColKeys,this);this.sortKeys=S(this.sortKeys,this);this.arrSort=S(this.arrSort,this);this.natSort=S(this.natSort,this);this.tree={};this.rowKeys=[];this.colKeys=[];this.flatRowKeys=[];this.flatColKeys=[];this.rowTotals={};this.colTotals={};this.allTotal=this.aggregator(this,[],[]);this.sorted=false}e.prototype.natSort=function(e,t){return h(e,t)};e.prototype.arrSort=function(e,t){return this.natSort(e.join(),t.join())};e.prototype.sortKeys=function(){if(!this.sorted){this.rowKeys.sort(this.arrSort);this.colKeys.sort(this.arrSort)}return this.sorted=true};e.prototype.getColKeys=function(){this.sortKeys();return this.colKeys};e.prototype.getRowKeys=function(){this.sortKeys();return this.rowKeys};e.prototype.flattenKey=function(e){return e.join(String.fromCharCode(0))};e.prototype.processRecord=function(e){var t,n,r,i,s;t=function(){var t,n,r,i;r=this.colAttrs;i=[];for(t=0,n=r.length;t<n;t++){s=r[t];i.push(e[s])}return i}.call(this);i=function(){var t,n,r,i;r=this.rowAttrs;i=[];for(t=0,n=r.length;t<n;t++){s=r[t];i.push(e[s])}return i}.call(this);r=this.flattenKey(i);n=this.flattenKey(t);this.allTotal.push(e);if(i.length!==0){if(b.call(this.flatRowKeys,r)<0){this.rowKeys.push(i);this.flatRowKeys.push(r)}if(!this.rowTotals[r]){this.rowTotals[r]=this.aggregator(this,i,[])}this.rowTotals[r].push(e)}if(t.length!==0){if(b.call(this.flatColKeys,n)<0){this.colKeys.push(t);this.flatColKeys.push(n)}if(!this.colTotals[n]){this.colTotals[n]=this.aggregator(this,[],t)}this.colTotals[n].push(e)}if(t.length!==0&&i.length!==0){if(!(r in this.tree)){this.tree[r]={}}if(!(n in this.tree[r])){this.tree[r][n]=this.aggregator(this,i,t)}return this.tree[r][n].push(e)}};e.prototype.getAggregator=function(e,t){var n,r,i;i=this.flattenKey(e);r=this.flattenKey(t);if(e.length===0&&t.length===0){n=this.allTotal}else if(e.length===0){n=this.colTotals[r]}else if(t.length===0){n=this.rowTotals[i]}else{n=this.tree[i][r]}return n!=null?n:{value:function(){return null},format:function(){return""}}};return e}();l=function(e,n,r,i,s,o){var u;u=new t(i,n,r);f(e,o,function(e){if(s(e)){return u.processRecord(e)}});return u};m=function(e,t,n){var r,i,s,o,u,a;if(t!==0){i=true;for(o=u=0;0<=n?u<=n:u>=n;o=0<=n?++u:--u){if(e[t-1][o]!==e[t][o]){i=false}}if(i){return-1}}r=0;while(t+r<e.length){s=false;for(o=a=0;0<=n?a<=n:a>=n;o=0<=n?++a:--a){if(e[t][o]!==e[t+r][o]){s=true}}if(s){break}r++}return r};d=function(t,n){var r,i,s,o,u,a,f,l,c,h,p,d,v,g,y,b,w,S,x;a={localeStrings:{totals:"Totals"}};n=e.extend(a,n);s=t.colAttrs;p=t.rowAttrs;v=t.getRowKeys();u=t.getColKeys();h=e("<table class='table table-bordered pvtTable'>");for(l in s){if(!E.call(s,l))continue;i=s[l];b=e("<tr>");if(parseInt(l)===0&&p.length!==0){b.append(e("<th>").attr("colspan",p.length).attr("rowspan",s.length))}b.append(e("<th class='pvtAxisLabel'>").text(i));for(f in u){if(!E.call(u,f))continue;o=u[f];x=m(u,parseInt(f),parseInt(l));if(x!==-1){g=e("<th class='pvtColLabel'>").text(o[l]).attr("colspan",x);if(parseInt(l)===s.length-1&&p.length!==0){g.attr("rowspan",2)}b.append(g)}}if(parseInt(l)===0){b.append(e("<th class='pvtTotalLabel'>").text(n.localeStrings.totals).attr("rowspan",s.length+(p.length===0?0:1)))}h.append(b)}if(p.length!==0){b=e("<tr>");for(f in p){if(!E.call(p,f))continue;c=p[f];b.append(e("<th class='pvtAxisLabel'>").text(c))}g=e("<th>");if(s.length===0){g.addClass("pvtTotalLabel").text(n.localeStrings.totals)}b.append(g);h.append(b)}for(f in v){if(!E.call(v,f))continue;d=v[f];b=e("<tr>");for(l in d){if(!E.call(d,l))continue;w=d[l];x=m(v,parseInt(f),parseInt(l));if(x!==-1){g=e("<th class='pvtRowLabel'>").text(w).attr("rowspan",x);if(parseInt(l)===p.length-1&&s.length!==0){g.attr("colspan",2)}b.append(g)}}for(l in u){if(!E.call(u,l))continue;o=u[l];r=t.getAggregator(d,o);S=r.value();b.append(e("<td class='pvtVal row"+f+" col"+l+"'>").html(r.format(S)).data("value",S))}y=t.getAggregator(d,[]);S=y.value();b.append(e("<td class='pvtTotal rowTotal'>").html(y.format(S)).data("value",S).data("for","row"+f));h.append(b)}b=e("<tr>");g=e("<th class='pvtTotalLabel'>").text(n.localeStrings.totals);g.attr("colspan",p.length+(s.length===0?0:1));b.append(g);for(l in u){if(!E.call(u,l))continue;o=u[l];y=t.getAggregator([],o);S=y.value();b.append(e("<td class='pvtTotal colTotal'>").html(y.format(S)).data("value",S).data("for","col"+l))}y=t.getAggregator([],[]);S=y.value();b.append(e("<td class='pvtGrandTotal'>").html(y.format(S)).data("value",S));h.append(b);h.data("dimensions",[v.length,u.length]);return h};e.fn.pivot=function(t,n){var r,s,o,u;r={cols:[],rows:[],filter:function(){return true},aggregator:i.count(),derivedAttributes:{},renderer:d,rendererOptions:null,localeStrings:{renderError:"An error occurred rendering the PivotTable results.",computeError:"An error occurred computing the PivotTable results."}};n=e.extend(r,n);u=null;try{o=l(t,n.cols,n.rows,n.aggregator,n.filter,n.derivedAttributes);try{u=n.renderer(o,n.rendererOptions)}catch(a){s=a;if(typeof console!=="undefined"&&console!==null){console.error(s.stack)}u=n.localeStrings.renderError}}catch(a){s=a;if(typeof console!=="undefined"&&console!==null){console.error(s.stack)}u=n.localeStrings.computeError}this.html(u);return this};e.fn.pivotUI=function(t,n,r){var o,u,a,l,c,p,d,m,g,y,w,S,x,T,N,C,k,L,A,O,M,_,D,P,H,B,j,F,I,q,R,U,z,W,X,V,J=this;if(r==null){r=false}c={derivedAttributes:{},aggregators:i,renderers:v,hiddenAttributes:[],menuLimit:200,cols:[],rows:[],vals:[],exclusions:{},unusedAttrsVertical:false,autoSortUnusedAttrs:false,rendererOptions:null,onRefresh:null,filter:function(){return true},localeStrings:{renderError:"An error occurred rendering the PivotTable results.",computeError:"An error occurred computing the PivotTable results.",uiRenderError:"An error occurred rendering the PivotTable UI.",selectAll:"Select All",selectNone:"Select None",tooMany:"(too many to list)"}};d=this.data("pivotUIOptions");if(d==null||r){y=e.extend(c,n)}else{y=d}try{t=s(t);k=function(){var e,n;e=t[0];n=[];for(g in e){if(!E.call(e,g))continue;n.push(g)}return n}();R=y.derivedAttributes;for(a in R){if(!E.call(R,a))continue;if(b.call(k,a)<0){k.push(a)}}u={};for(D=0,j=k.length;D<j;D++){M=k[D];u[M]={}}f(t,y.derivedAttributes,function(e){var t,n,r;r=[];for(g in e){if(!E.call(e,g))continue;t=e[g];if(t==null){t="null"}if((n=u[g])[t]==null){n[t]=0}r.push(u[g][t]++)}return r});O=e("<table class='table table-bordered' cellpadding='5'>");N=e("<td>");T=e("<select class='pvtRenderer'>").bind("change",function(){return S()});U=y.renderers;for(M in U){if(!E.call(U,M))continue;T.append(e("<option>").val(M).text(M))}N.append(T);l=e("<td class='pvtAxisContainer pvtUnused'>");if(y.unusedAttrsVertical){l.addClass("pvtVertList")}else{l.addClass("pvtHorizList")}C=function(){var e,t,n;n=[];for(e=0,t=k.length;e<t;e++){a=k[e];if(b.call(y.hiddenAttributes,a)<0){n.push(a)}}return n}();_=function(t){var n,r,i,s,o,a,f,c,p,d,v,w,E,x,T;f=function(){var e;e=[];for(g in u[t]){e.push(g)}return e}();a=false;w=e("<div>").addClass("pvtFilterBox").css({"z-index":100,width:"280px",border:"1px solid gray",background:"white",display:"none",position:"absolute",padding:"20px"});w.append(e("<div>").css({"text-align":"center","font-weight":"bold"}).text(""+t+" ("+f.length+")"));if(f.length>y.menuLimit){w.append(e("<p>").css({"text-align":"center"}).text(y.localeStrings.tooMany))}else{r=e("<p>").css({"text-align":"center","margin-bottom":"5px"});r.append(e("<button>").text(y.localeStrings.selectAll).bind("click",function(){return w.find("input").prop("checked",true)}));r.append(e("<button>").text(y.localeStrings.selectNone).bind("click",function(){return w.find("input").prop("checked",false)}));w.append(r);i=e("<div>").css({overflow:"scroll",width:"280px","max-height":"200px"});T=f.sort(h);for(E=0,x=T.length;E<x;E++){g=T[E];v=u[t][g];s=e("<label>");o=y.exclusions[t]?b.call(y.exclusions[t],g)>=0:false;a||(a=o);s.append(e("<input type='checkbox' class='pvtFilter'>").attr("checked",!o).data("filter",[t,g]));s.append(e("<span>").text(""+g+" ("+v+")"));i.append(e("<p>").css("margin","5px").append(s))}w.append(i)}d=function(){var t;t=e(w).find("[type='checkbox']").length-e(w).find("[type='checkbox']:checked").length;if(t>0){n.addClass("pvtFilteredAttribute")}else{n.removeClass("pvtFilteredAttribute")}if(f.length>y.menuLimit){return w.toggle()}else{return w.toggle(0,S)}};w.append(e("<p>").css({"text-align":"center","margin-bottom":0}).append(e("<button>").text("OK").bind("click",d)));c=function(e){return w.css({left:e.pageX,top:e.pageY}).toggle()};p=e("<span class='pvtTriangle'>").html(" &#x25BE;").bind("click",c);n=e("<li class='label label-info axis_"+m+"'>").append(e("<nobr>").text(t).data("attrName",t).append(p));if(a){n.addClass("pvtFilteredAttribute")}l.append(n).append(w);return n.bind("dblclick",c)};for(m in C){a=C[m];_(a)}L=e("<tr>");o=e("<select class='pvtAggregator'>").css("margin-bottom","5px").bind("change",function(){return S()});z=y.aggregators;for(M in z){if(!E.call(z,M))continue;o.append(e("<option>").val(M).text(M))}L.append(e("<td class='pvtAxisContainer pvtHorizList pvtVals'>").css("text-align","center").append(o).append(e("<br>")));L.append(e("<td class='pvtAxisContainer pvtHorizList pvtCols'>"));O.append(L);A=e("<tr>");A.append(e("<td valign='top' class='pvtAxisContainer pvtRows'>"));w=e("<td valign='top' class='pvtRendererArea'>");A.append(w);O.append(A);if(y.unusedAttrsVertical){O.find("tr:nth-child(1)").prepend(N);O.find("tr:nth-child(2)").prepend(l.css("vertical-align","top"))}else{O.prepend(e("<tr>").append(N).append(l))}this.html(O);W=y.cols;for(P=0,F=W.length;P<F;P++){M=W[P];this.find(".pvtCols").append(this.find(".axis_"+C.indexOf(M)))}X=y.rows;for(H=0,I=X.length;H<I;H++){M=X[H];this.find(".pvtRows").append(this.find(".axis_"+C.indexOf(M)))}V=y.vals;for(B=0,q=V.length;B<q;B++){M=V[B];this.find(".pvtVals").append(this.find(".axis_"+C.indexOf(M)))}if(y.aggregatorName!=null){this.find(".pvtAggregator").val(y.aggregatorName)}if(y.rendererName!=null){this.find(".pvtRenderer").val(y.rendererName)}x=function(){var n,r,i,s,u;i={derivedAttributes:y.derivedAttributes,localeStrings:y.localeStrings,rendererOptions:y.rendererOptions,cols:[],rows:[]};u=[];J.find(".pvtRows li nobr").each(function(){return i.rows.push(e(this).data("attrName"))});J.find(".pvtCols li nobr").each(function(){return i.cols.push(e(this).data("attrName"))});J.find(".pvtVals li nobr").each(function(){return u.push(e(this).data("attrName"))});i.aggregator=y.aggregators[o.val()](u);i.renderer=y.renderers[T.val()];n={};J.find("input.pvtFilter").not(":checked").each(function(){var t;t=e(this).data("filter");console.log(t);if(n[t[0]]!=null){return n[t[0]].push(t[1])}else{return n[t[0]]=[t[1]]}});i.filter=function(e){var t,r;if(!y.filter(e)){return false}for(g in n){t=n[g];if(r=""+e[g],b.call(t,r)>=0){return false}}return true};w.pivot(t,i);J.data("pivotUIOptions",{cols:i.cols,rows:i.rows,vals:u,exclusions:n,hiddenAttributes:y.hiddenAttributes,renderers:y.renderers,aggregators:y.aggregators,filter:y.filter,derivedAttributes:y.derivedAttributes,aggregatorName:o.val(),rendererName:T.val(),localeStrings:y.localeStrings,rendererOptions:y.rendererOptions});if(y.autoSortUnusedAttrs){r=e.pivotUtilities.naturalSort;s=J.find("td.pvtUnused.pvtAxisContainer");e(s).children("li").sort(function(t,n){return r(e(t).text(),e(n).text())}).appendTo(s)}w.css("opacity",1);if(y.onRefresh!=null){return y.onRefresh()}};S=function(){w.css("opacity",.5);return setTimeout(x,10)};S();this.find(".pvtAxisContainer").sortable({update:S,connectWith:this.find(".pvtAxisContainer"),items:"li",placeholder:"placeholder"})}catch(K){p=K;if(typeof console!=="undefined"&&console!==null){console.error(p.stack)}this.html(y.localeStrings.uiRenderError)}return this};e.fn.heatmap=function(t){var n,r,i,s,o,u,a,f,l,c=this;if(t==null){t="heatmap"}l=this.data("dimensions"),u=l[0],o=l[1];n=function(e,t,n){var r;r=function(){switch(e){case"red":return function(e){return"ff"+e+e};case"green":return function(e){return""+e+"ff"+e};case"blue":return function(e){return""+e+e+"ff"}}}();return function(e){var i,s;s=255-Math.round(255*(e-t)/(n-t));i=s.toString(16).split(".")[0];if(i.length===1){i=0+i}return r(i)}};r=function(t,r){var i,s,o;s=function(n){return c.find(t).each(function(){var t;t=e(this).data("value");if(t!=null&&isFinite(t)){return n(t,e(this))}})};o=[];s(function(e){return o.push(e)});i=n(r,Math.min.apply(Math,o),Math.max.apply(Math,o));return s(function(e,t){return t.css("background-color","#"+i(e))})};switch(t){case"heatmap":r(".pvtVal","red");break;case"rowheatmap":for(i=a=0;0<=u?a<u:a>u;i=0<=u?++a:--a){r(".pvtVal.row"+i,"red")}break;case"colheatmap":for(s=f=0;0<=o?f<o:f>o;s=0<=o?++f:--f){r(".pvtVal.col"+s,"red")}}r(".pvtTotal.rowTotal","red");r(".pvtTotal.colTotal","red");return this};e.fn.barchart=function(){var t,n,r,i,s,o,u=this;o=this.data("dimensions"),i=o[0],r=o[1];t=function(t){var n,r,i,s;n=function(n){return u.find(t).each(function(){var t;t=e(this).data("value");if(t!=null&&isFinite(t)){return n(t,e(this))}})};s=[];n(function(e){return s.push(e)});r=Math.max.apply(Math,s);i=function(e){return 100*e/(1.4*r)};return n(function(t,n){var r,s;r=n.text();s=e("<div>").css({position:"relative",height:"55px"});s.append(e("<div>").css({position:"absolute",bottom:0,left:0,right:0,height:i(t)+"%","background-color":"gray"}));s.append(e("<div>").text(r).css({position:"relative","padding-left":"5px","padding-right":"5px"}));return n.css({padding:0,"padding-top":"5px","text-align":"center"}).html(s)})};for(n=s=0;0<=i?s<i:s>i;n=0<=i?++s:--s){t(".pvtVal.row"+n)}t(".pvtTotal.colTotal");return this}}).call(this)
 
             Rally.launchApp('CustomApp', {
                 name:"portfolio-pivot-table",

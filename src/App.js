@@ -17,6 +17,25 @@ Ext.define('CustomApp', {
 		//Write app code here
 		app = this;
 
+		app.taskSummary = Ext.create("FeatureRollUp", {
+            type : 'Task',
+            fields : ["Estimate","ToDo"],
+            operation : 'sum',
+            attrName : 'TaskSummary',
+            aggregator : aggregator("TaskSummary")
+		});
+
+		app.defectSummary = Ext.create("FeatureRollUp", {
+            type : 'Defect',
+            fields : ["FormattedID"],
+            operation : 'count',
+            attrName : 'DefectSummary',
+            aggregator : aggregator("DefectSummary")
+		});
+
+		console.log(app.taskSummary.attrName,
+			app.defectSummary.attrName);
+
 		var panel = Ext.create('Ext.container.Container', {
 					itemId : 'panel',
 					title: 'Hello',
@@ -69,9 +88,10 @@ Ext.define('CustomApp', {
 
 		return {
 			fetch : ['Name','_UnformattedID','ObjectID','_TypeHierarchy','c_STO', '_ItemHierarchy',
-						'InvestmentCategory','PortfolioItemType','State','Owner','Project','Parent'
+						'InvestmentCategory','PortfolioItemType','State','Owner','Project','Parent',
+						'Release','FormattedID'
 					],
-			hydrate : ['_TypeHierarchy','State','PortfolioItemType','InvestmentCategory'],
+			hydrate : ['_TypeHierarchy','State','PortfolioItemType','InvestmentCategory','Release'],
 			pageSize:1000,
 			find : {
 				'_TypeHierarchy' : { "$in" : [type]} ,
@@ -88,9 +108,7 @@ Ext.define('CustomApp', {
 		});
 
 		async.mapSeries( configs, app.readSnapshots, function(err,results) {
-
 			app.addThemesToFeatures(results[0],results[1]);
-
 		});
 	},
 
@@ -106,6 +124,12 @@ Ext.define('CustomApp', {
 			f.set("Initiative", initiative  ? initiative.get("Name") : "None");
 		});
 
+		app.taskSummary.fillFeatures(features,function(error,success) {
+			app.defectSummary.fillFeatures(features,function(error,success) {
+				console.log("success",success,features);
+				app.pivotTable(features);
+			});
+		});
 
 	},
 
@@ -137,7 +161,7 @@ Ext.define('CustomApp', {
 			f.set("Team",p.get("Name"));
 		});
 
-		app.pivotTable(features);
+		
 
 	},
 
@@ -178,6 +202,18 @@ Ext.define('CustomApp', {
 		});
 	},
 
+	addCommas : function(nStr) {
+            var rgx, x, x1, x2;
+            nStr += '';
+            x = nStr.split('.');
+            x1 = x[0];
+            x2 = x.length > 1 ? '.' + x[1] : '';
+            rgx = /(\d+)(\d{3})/;
+            while (rgx.test(x1)) {
+              x1 = x1.replace(rgx, '$1' + ',' + '$2');
+            }
+            return x1 + x2;
+    },
 
 	pivotTable : function(features) {
 
@@ -197,21 +233,24 @@ Ext.define('CustomApp', {
 		var ownerDeriver = function(record) {
 			return record.OwnerName;
 		};
-
+		var releaseDeriver = function(record) {
+			return record.Release.Name;
+		};
 
 		var derived = {
 			"Initiative" : initDeriver,
-			"OwnerName" : ownerDeriver
+			"OwnerName" : ownerDeriver,
+			"Release" : releaseDeriver
 		};   
-
 
 		$(app.jqPanel).pivotUI(
 			data,                    
 			{
 				derivedAttributes : derived,
-				// aggregators : { cycleTime : cycleTime },
-				// cols: ["InvestmentCategory"],
-				// rows: ["Initiative"],
+				aggregators : { 
+					taskSummary : app.taskSummary.aggregator,
+				 	defectSummary : app.defectSummary.aggregator
+				},
 				cols: cols,
 				rows: rows,
 				hiddenAttributes : ["Project","Owner","ObjectID","_TypeHierarchy","_UnformattedID","_ValidFrom","_ValidTo","PortfolioItemType","_ItemHierarchy"]

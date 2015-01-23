@@ -2,13 +2,15 @@
    "name": "portfolio-pivot-table",
    "className": "CustomApp",
    "server": "https://rally1.rallydev.com",
-   "sdk": "2.0rc2",
+   "sdk": "2.0rc3",
    "javascript": [
-      "App.js",
       "https://cdnjs.cloudflare.com/ajax/libs/async/1.22/async.min.js",
       "https://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.min.js",
       "https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js",
-      "./lib/pivot-min.js"
+      "./lib/pivot-min.js",
+      "src/feature-roll-up.js",
+      "src/util.js",
+      "src/App.js"
    ],
    "css": [
       "app.css",
