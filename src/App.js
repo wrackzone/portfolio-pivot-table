@@ -17,29 +17,49 @@ Ext.define('CustomApp', {
 		//Write app code here
 		app = this;
 
-		app.taskSummary = Ext.create("FeatureRollUp", {
-            type : 'Task',
-            fields : ["Estimate","ToDo"],
-            operation : 'sum',
-            attrName : 'TaskSummary',
-            aggregator : aggregator("TaskSummary")
-		});
+		app.rollups = [ 
+			{
+				summary : Ext.create("FeatureRollUp", {
+		            type : 'Task',
+		            fields : ["Estimate","ToDo","Actuals"],
+		            operation : 'sum',
+		            attrName : 'TaskSummary',
+		            aggregator : aggregator("TaskSummary")
+				}) 
+			},
+			{
+				summary : Ext.create("FeatureRollUp", {
+		            type : 'Defect',
+		            fields : ["FormattedID"],
+		            operation : 'count',
+		            attrName : 'DefectSummary',
+		            aggregator : aggregator("DefectSummary")
+				}) 
+			},
+			{
+				summary : Ext.create("FeatureRollUp", {
+		            type : 'TestCase',
+		            fields : ["FormattedID"],
+		            operation : 'count',
+		            attrName : 'TestCaseSummary',
+		            aggregator : aggregator("TestCaseSummary")
+				}) 
+			}
 
-		app.defectSummary = Ext.create("FeatureRollUp", {
-            type : 'Defect',
-            fields : ["FormattedID"],
-            operation : 'count',
-            attrName : 'DefectSummary',
-            aggregator : aggregator("DefectSummary")
-		});
+		];
 
-		console.log(app.taskSummary.attrName,
-			app.defectSummary.attrName);
+		// app.defectSummary = Ext.create("FeatureRollUp", {
+  //           type : 'Defect',
+  //           fields : ["FormattedID"],
+  //           operation : 'count',
+  //           attrName : 'DefectSummary',
+  //           aggregator : aggregator("DefectSummary")
+		// });
 
 		var panel = Ext.create('Ext.container.Container', {
-					itemId : 'panel',
-					title: 'Hello',
-					html: '<p></p>'
+			itemId : 'panel',
+			title: 'Hello',
+			html: '<p></p>'
 		});
 
 		// read the saved settings.
@@ -124,13 +144,17 @@ Ext.define('CustomApp', {
 			f.set("Initiative", initiative  ? initiative.get("Name") : "None");
 		});
 
-		app.taskSummary.fillFeatures(features,function(error,success) {
-			app.defectSummary.fillFeatures(features,function(error,success) {
-				console.log("success",success,features);
+		async.map(app.rollups,
+			function(rollup,callback) {
+				rollup.summary.fillFeatures(features,function(error,success) {
+					callback(null,success);
+				});
+			},
+			function(error,results) {
+				console.log("success",results);
 				app.pivotTable(features);
-			});
-		});
-
+			}
+		);
 	},
 
 	cleanUpFieldNames : function(features) {
@@ -243,14 +267,20 @@ Ext.define('CustomApp', {
 			"Release" : releaseDeriver
 		};   
 
+		var aggNames = _.map(app.rollups, function(r) { return r.summary.attrName; });
+		var aggs = _.map(app.rollups, function(r) { return r.summary.aggregator; });
+		var aggregators = _.zipObject(aggNames, aggs);
+		console.log("aggregators",aggregators);
+
 		$(app.jqPanel).pivotUI(
 			data,                    
 			{
 				derivedAttributes : derived,
-				aggregators : { 
-					taskSummary : app.taskSummary.aggregator,
-				 	defectSummary : app.defectSummary.aggregator
-				},
+				aggregators : aggregators,
+				// aggregators : { 
+				// 	taskSummary : app.taskSummary.aggregator,
+				//  	defectSummary : app.defectSummary.aggregator
+				// },
 				cols: cols,
 				rows: rows,
 				hiddenAttributes : ["Project","Owner","ObjectID","_TypeHierarchy","_UnformattedID","_ValidFrom","_ValidTo","PortfolioItemType","_ItemHierarchy"]
