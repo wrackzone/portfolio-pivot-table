@@ -9,8 +9,7 @@ Ext.define("FeatureRollUp", function() {
     return {
         config : {
                 type : '',
-                fields : [],
-                operation : '',
+                operation : null,
                 attrName : '',
                 aggregator : null
         },
@@ -18,7 +17,6 @@ Ext.define("FeatureRollUp", function() {
         constructor:function(config) {
             self = this;
             this.initConfig(config);
-            console.log("attr:",self.attrName);
             return this;
         },
 
@@ -30,14 +28,13 @@ Ext.define("FeatureRollUp", function() {
                 return { 
                     feature : feature.get("ObjectID"), 
                     type : that.type,
-                    fields : that.fields,
+                    // fields : that.fields,
                     operation : that.operation,
                     attrName : that.attrName
                 };
             });
 
             async.map(configs, that.rollUp, function(error,result) {
-                console.log("AttrName",that.attrName);
                 _.each(features,function(feature,i) {
                     feature.set(that.attrName,result[i]);
                 });
@@ -47,33 +44,76 @@ Ext.define("FeatureRollUp", function() {
         },
 
         rollUp : function( config, callback ) {
+
+            var that = this;
         
             var hydrate = ['_TypeHierarchy'];
+            var fetch = hydrate.concat(config.operation.fields);
+            if (!_.isUndefined(config.operation.groupBy))
+                fetch.push(config.operation.groupBy);
+
             var cfg = {
                 find : {
-                    '_TypeHierarchy' : { "$in" : [config.type] },
+                    '_TypeHierarchy' : { "$in" : _.isArray(config.type) ? config.type : [config.type] },
                     '_ItemHierarchy' : { "$in" : [config.feature] },
                     __At : 'current'
                 },
                 hydrate : hydrate,
-                fetch : hydrate.concat(config.fields)
+                fetch : fetch
             };
 
-            self.readSnapshots(cfg, function(error,snapshots) {
-                var totals = _.map( config.fields, function(f) {
-                    return _.reduce( snapshots, function(memo,s) {
-                        var val = null; var fv = s.get(f) ? parseFloat(s.get(f)) : 0;
-                        switch( config.operation ) {
+            // eg. Blocked grouped by Block return count for True / False
+            var groupTotals = function(snapshots,config) {
+                var grouped = _.groupBy( snapshots, function( snap ) {
+                    return snap.get(config.operation.groupBy);
+                });
+                var field = _.first(config.operation.fields)  // we only group by a single field
+                var keys = _.keys(grouped);
+                var totals = _.map( keys, function(key) {
+                    var keySnapshots = grouped[key];
+                    return _.reduce( keySnapshots, function(memo,s) {
+                        var val = null; var fv = s[field] ? parseFloat(s[field]) : 0;
+                        switch( config.operation.operator ) {
                             case 'sum': 
                                 val = memo + fv;
                                 break;
                             case 'count':
                                 val = memo + 1;
+                            default : 
+                                console.log("no valid operator specified",config.operation);
                         };
                         return val;
                     },0);
                 });
-                callback(null,_.zipObject(config.fields,totals));
+                return _.zipObject(keys,totals);
+            };
+
+            // eg. Task Estimate
+            var operationTotals = function(snapshots,config) {
+                var totals = _.map( config.operation.fields, function(f) {
+                    return _.reduce( snapshots, function(memo,s) {
+                        var val = null; var fv = s.get(f) ? parseFloat(s.get(f)) : 0;
+                        switch( config.operation.operator ) {
+                            case 'sum': 
+                                val = memo + fv;
+                                break;
+                            case 'count':
+                                val = memo + 1;
+                            default : 
+                                console.log("no valid operator specified",config.operation);
+
+                        };
+                        return val;
+                    },0);
+                });
+                return _.zipObject(config.operation.fields,totals);
+            };
+
+            self.readSnapshots(cfg, function(error,snapshots) {
+                var totals = _.isUndefined(config.operation.groupBy) ? 
+                    operationTotals(snapshots,config) :
+                            groupTotals( snapshots, config);
+                callback(null,totals);
             });
         },
 

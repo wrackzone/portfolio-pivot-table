@@ -21,8 +21,7 @@ Ext.define('CustomApp', {
 			{
 				summary : Ext.create("FeatureRollUp", {
 		            type : 'Task',
-		            fields : ["Estimate","ToDo","Actuals"],
-		            operation : 'sum',
+		            operation : { operator : 'sum', fields : ["Estimate","ToDo","Actuals"] },
 		            attrName : 'TaskSummary',
 		            aggregator : aggregator("TaskSummary")
 				}) 
@@ -30,8 +29,7 @@ Ext.define('CustomApp', {
 			{
 				summary : Ext.create("FeatureRollUp", {
 		            type : 'Defect',
-		            fields : ["FormattedID"],
-		            operation : 'count',
+		            operation : { operator : 'count', fields : ["FormattedID"] },
 		            attrName : 'DefectSummary',
 		            aggregator : aggregator("DefectSummary")
 				}) 
@@ -39,22 +37,22 @@ Ext.define('CustomApp', {
 			{
 				summary : Ext.create("FeatureRollUp", {
 		            type : 'TestCase',
-		            fields : ["FormattedID"],
-		            operation : 'count',
+		            operation : { operator : 'count', fields : ["FormattedID"] },
 		            attrName : 'TestCaseSummary',
 		            aggregator : aggregator("TestCaseSummary")
 				}) 
+			},
+			{
+				summary : Ext.create("FeatureRollUp", {
+		            type : ['HierarchicalRequirement','Defect','Task'],
+		            operation : { operator : 'count', fields : ["FormattedID"], groupBy : 'Blocked' },
+		            attrName : 'BlockedSummary',
+		            aggregator : aggregator("BlockedSummary")
+				}) 
 			}
 
-		];
 
-		// app.defectSummary = Ext.create("FeatureRollUp", {
-  //           type : 'Defect',
-  //           fields : ["FormattedID"],
-  //           operation : 'count',
-  //           attrName : 'DefectSummary',
-  //           aggregator : aggregator("DefectSummary")
-		// });
+		];
 
 		var panel = Ext.create('Ext.container.Container', {
 			itemId : 'panel',
