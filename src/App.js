@@ -95,6 +95,7 @@ Ext.define('CustomApp', {
 
 		async.map(configs,app.wsapiQuery,function(err,results) {
 			app.projects = results[0];
+			console.log("projects",app.projects);
 			app.readPortfolioItems();
 		});
 
@@ -112,8 +113,9 @@ Ext.define('CustomApp', {
 			hydrate : ['_TypeHierarchy','State','PortfolioItemType','InvestmentCategory','Release'],
 			pageSize:1000,
 			find : {
-				'_TypeHierarchy' : { "$in" : [type]} ,
-				'Project' : { "$in": projects }, 
+				'_TypeHierarchy' : { "$in" : [type]},
+				'_ProjectHierarchy' : { "$in" : [app.getContext().getProject()["ObjectID"]]},
+				// 'Project' : { "$in": projects }, 
 				__At : 'current'
 			}
 		};
@@ -126,6 +128,7 @@ Ext.define('CustomApp', {
 		});
 
 		async.mapSeries( configs, app.readSnapshots, function(err,results) {
+			console.log("readPortfolioItems Results:",results);
 			app.addThemesToFeatures(results[0],results[1]);
 		});
 	},
@@ -290,7 +293,7 @@ Ext.define('CustomApp', {
 	},
 
 	readSnapshots : function( config, callback) {
-		console.log("reading page of snapshots...");
+		console.log("reading page of snapshots...",config);
 		var storeConfig = {
 			find : config.find,
 			autoLoad : true,

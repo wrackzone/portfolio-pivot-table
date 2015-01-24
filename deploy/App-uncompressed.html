@@ -88,10 +88,9 @@ Ext.define("FeatureRollUp", function() {
                         var val = null; var fv = s[field] ? parseFloat(s[field]) : 0;
                         switch( config.operation.operator ) {
                             case 'sum': 
-                                val = memo + fv;
-                                break;
+                                val = memo + fv; break;
                             case 'count':
-                                val = memo + 1;
+                                val = memo + 1; break;
                             default : 
                                 console.log("no valid operator specified",config.operation);
                         };
@@ -108,13 +107,11 @@ Ext.define("FeatureRollUp", function() {
                         var val = null; var fv = s.get(f) ? parseFloat(s.get(f)) : 0;
                         switch( config.operation.operator ) {
                             case 'sum': 
-                                val = memo + fv;
-                                break;
+                                val = memo + fv; break;
                             case 'count':
-                                val = memo + 1;
+                                val = memo + 1; break;
                             default : 
                                 console.log("no valid operator specified",config.operation);
-
                         };
                         return val;
                     },0);
@@ -294,6 +291,7 @@ Ext.define('CustomApp', {
 
 		async.map(configs,app.wsapiQuery,function(err,results) {
 			app.projects = results[0];
+			console.log("projects",app.projects);
 			app.readPortfolioItems();
 		});
 
@@ -311,8 +309,9 @@ Ext.define('CustomApp', {
 			hydrate : ['_TypeHierarchy','State','PortfolioItemType','InvestmentCategory','Release'],
 			pageSize:1000,
 			find : {
-				'_TypeHierarchy' : { "$in" : [type]} ,
-				'Project' : { "$in": projects }, 
+				'_TypeHierarchy' : { "$in" : [type]},
+				'_ProjectHierarchy' : { "$in" : [app.getContext().getProject()["ObjectID"]]},
+				// 'Project' : { "$in": projects }, 
 				__At : 'current'
 			}
 		};
@@ -325,6 +324,7 @@ Ext.define('CustomApp', {
 		});
 
 		async.mapSeries( configs, app.readSnapshots, function(err,results) {
+			console.log("readPortfolioItems Results:",results);
 			app.addThemesToFeatures(results[0],results[1]);
 		});
 	},
@@ -489,7 +489,7 @@ Ext.define('CustomApp', {
 	},
 
 	readSnapshots : function( config, callback) {
-		console.log("reading page of snapshots...");
+		console.log("reading page of snapshots...",config);
 		var storeConfig = {
 			find : config.find,
 			autoLoad : true,

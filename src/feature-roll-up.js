@@ -75,10 +75,9 @@ Ext.define("FeatureRollUp", function() {
                         var val = null; var fv = s[field] ? parseFloat(s[field]) : 0;
                         switch( config.operation.operator ) {
                             case 'sum': 
-                                val = memo + fv;
-                                break;
+                                val = memo + fv; break;
                             case 'count':
-                                val = memo + 1;
+                                val = memo + 1; break;
                             default : 
                                 console.log("no valid operator specified",config.operation);
                         };
@@ -95,13 +94,11 @@ Ext.define("FeatureRollUp", function() {
                         var val = null; var fv = s.get(f) ? parseFloat(s.get(f)) : 0;
                         switch( config.operation.operator ) {
                             case 'sum': 
-                                val = memo + fv;
-                                break;
+                                val = memo + fv; break;
                             case 'count':
-                                val = memo + 1;
+                                val = memo + 1; break;
                             default : 
                                 console.log("no valid operator specified",config.operation);
-
                         };
                         return val;
                     },0);
