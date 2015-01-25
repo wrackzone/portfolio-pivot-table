@@ -167,11 +167,15 @@ var aggregator =  function(attrName) {
                     this.recs.push(record);
                 },
                 value: function() {
+
                     var that = this;
                     if (this.recs.length<=0)
                         return null;
                     var first = _.first(this.recs);
                     var keys = _.keys(first[_attrName]);
+                    if (keys.length<=0) {
+                        return null;
+                    }
                     var vals = _.map(keys,function(key) {
                         var recVals = _.map(that.recs , function(rec) { 
                             return rec[_attrName][key]
@@ -184,7 +188,10 @@ var aggregator =  function(attrName) {
                     return _.zipObject(keys,vals);
                 },
                 format: function(val) { 
-                    return "<table>" + 
+                    if (_.isNull(val)||_.isUndefined(val))
+                        return '';
+                    else
+                        return "<table>" + 
                     "<tr><td>"+_.keys(val).join("</td><td>") + "</td></tr>" +
                     "<tr><td>"+_.values(val).join("</td><td>") + "</td></tr>" +
                     "</table>"
