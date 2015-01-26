@@ -157,38 +157,42 @@ var aggregator =  function(attrName) {
         var _attrName = attrName;
 
         return function(x,y,z) {
-            var xx = x;
-            var yy = y;
-            var zz = z;
-            
             return {
                 recs : [],
                 push: function(record) {
                     this.recs.push(record);
                 },
                 value: function() {
-
+                    // value is an aggregation of the records. 
                     var that = this;
+                    // return null if no records
                     if (this.recs.length<=0)
                         return null;
                     var first = _.first(this.recs);
                     var keys = _.keys(first[_attrName]);
+                    // if no keys return null
                     if (keys.length<=0) {
                         return null;
                     }
+                    // aggregate each of the keys
                     var vals = _.map(keys,function(key) {
+                        // get the set of values by extracting the records attrname values
                         var recVals = _.map(that.recs , function(rec) { 
                             return rec[_attrName][key]
                         });
+                        // sum the values
                         return _.reduce( recVals ,
                             function(memo,val) {
                                 return memo + (val ? val : 0);
                         }, 0 );
                     });
+                    // convert the array of keys and values into an object
                     return _.zipObject(keys,vals);
                 },
                 format: function(val) { 
-                    if (_.isNull(val)||_.isUndefined(val))
+                    if (_.isNull(val)||_.isUndefined(val)||
+                        _.isUndefined(_.find(
+                            _.values(val),function(v) { return _.isNumber(v) && v > 0;})))
                         return '';
                     else
                         return "<table>" + 
