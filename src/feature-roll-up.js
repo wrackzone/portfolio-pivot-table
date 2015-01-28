@@ -49,8 +49,10 @@ Ext.define("FeatureRollUp", function() {
         
             var hydrate = ['_TypeHierarchy'];
             var fetch = hydrate.concat(config.operation.fields);
-            if (!_.isUndefined(config.operation.groupBy))
+            if (!_.isUndefined(config.operation.groupBy)) {
                 fetch.push(config.operation.groupBy);
+                hydrate.push(config.operation.groupBy);
+            }
 
             var cfg = {
                 find : {

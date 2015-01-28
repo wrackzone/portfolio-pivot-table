@@ -29,7 +29,7 @@ Ext.define('CustomApp', {
 			{
 				summary : Ext.create("FeatureRollUp", {
 		            type : 'Defect',
-		            operation : { operator : 'count', fields : ["FormattedID"] },
+		            operation : { operator : 'count', fields : ["FormattedID"], groupBy : 'State' },
 		            attrName : 'DefectSummary',
 		            aggregator : aggregator("DefectSummary")
 				}) 
@@ -106,7 +106,7 @@ Ext.define('CustomApp', {
 		var projects = _.map(app.projects,function(p) { return p.get("ObjectID");});
 
 		return {
-			fetch : ['Name','_UnformattedID','ObjectID','_TypeHierarchy','c_STO', '_ItemHierarchy',
+			fetch : ['Name','_UnformattedID','ObjectID','_TypeHierarchy', '_ItemHierarchy',
 						'InvestmentCategory','PortfolioItemType','State','Owner','Project','Parent',
 						'Release','FormattedID'
 					],
@@ -271,6 +271,12 @@ Ext.define('CustomApp', {
 		var aggNames = _.map(app.rollups, function(r) { return r.summary.attrName; });
 		var aggs = _.map(app.rollups, function(r) { return r.summary.aggregator; });
 		var aggregators = _.zipObject(aggNames, aggs);
+
+		var hidden = ["Project","Owner","ObjectID","_TypeHierarchy","_UnformattedID","_ValidFrom","_ValidTo","PortfolioItemType","_ItemHierarchy"];
+		var attrNames = _.map(app.rollups,function(rollup){return rollup.summary.attrName;});
+		hidden = hidden.concat(attrNames);
+		console.log("hidden",attrNames);
+
 		console.log("aggregators",aggregators);
 
 		$(app.jqPanel).pivotUI(
@@ -278,13 +284,9 @@ Ext.define('CustomApp', {
 			{
 				derivedAttributes : derived,
 				aggregators : aggregators,
-				// aggregators : { 
-				// 	taskSummary : app.taskSummary.aggregator,
-				//  	defectSummary : app.defectSummary.aggregator
-				// },
 				cols: cols,
 				rows: rows,
-				hiddenAttributes : ["Project","Owner","ObjectID","_TypeHierarchy","_UnformattedID","_ValidFrom","_ValidTo","PortfolioItemType","_ItemHierarchy"]
+				hiddenAttributes : hidden
 			}
 		);
 
