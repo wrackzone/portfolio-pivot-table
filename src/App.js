@@ -9,13 +9,18 @@ Ext.define('CustomApp', {
 	config: {
 		defaultSettings: {
 			rows: 'Initiative',
-			cols: 'InvestmentCategory'
+			cols: 'InvestmentCategory',
+			customFields : 'Cost,CustomerRequests',
+			customFieldsType : 'HierarchicalRequirement'
 		}
 	},
 	// items:{ html:'<a href="https://help.rallydev.com/apps/2.0rc2/doc/">App SDK 2.0rc2 Docs</a>'},
 	launch: function() {
 		//Write app code here
 		app = this;
+
+		app.customFields = app.getSetting('customFields');
+		app.customFieldsType = app.getSetting('customFieldsType');
 
 		app.rollups = [ 
 			{
@@ -50,9 +55,9 @@ Ext.define('CustomApp', {
 		            aggregator : aggregator("BlockedSummary")
 				}) 
 			}
-
-
 		];
+
+		app.addCustomFieldRollup(app.rollups,app.customFields,app.customFieldsType);
 
 		var panel = Ext.create('Ext.container.Container', {
 			itemId : 'panel',
@@ -70,7 +75,24 @@ Ext.define('CustomApp', {
 
 		app.mask = new Ext.LoadMask(Ext.getBody(), {msg:"Please wait..."});
 		app.mask.show();
-		app.loadProjects();
+		app.loadProjectInfo();
+	},
+
+	addCustomFieldRollup : function(rollups,customFields,customFieldsType) {
+		if (!_.isNull(customFields) && !_.isNull(customFieldsType) &&
+			customFields !== "" && customFieldsType !== "" && customFields.split(",").length>0) {
+				var fields = _.map( customFields.split(","),function(f){
+					return "c_" + f;
+				});
+				rollups.push({
+					summary : Ext.create("FeatureRollUp", {
+			            type : [customFieldsType],
+			            operation : { operator : 'sum', fields : fields },
+			            attrName : 'CustomFieldsSummary',
+			            aggregator : aggregator("CustomFieldsSummary")
+					}) 
+				});
+		}
 	},
 
 	getSettingsFields: function() {
@@ -82,20 +104,38 @@ Ext.define('CustomApp', {
 			{
 				name: 'cols',
 				xtype: 'rallytextfield'
+			},
+			{
+				name: 'customFields',
+				xtype: 'rallytextfield'
 			}
 		];
 	},
 
-	loadProjects : function() {
+	loadProjectInfo : function() {
 
-		var configs = [ {
-			model : "Project",
-			fetch : ["Name","ObjectID"]
-		} ];
+		var configs = [ 
+			{
+				model : "Project",
+				fetch : ["Name","ObjectID"]
+			},
+			{ 
+				model : "PreliminaryEstimate", 
+				fetch : ['Name','ObjectID','Value'], 
+				filters : [] 
+        	},
+        	{ 
+    			model : "TypeDefinition",
+				fetch : true,
+				filters : [ { property:"TypePath", operator:"contains", value:'PortfolioItem'} ]
+        	}
+		];
 
 		async.map(configs,app.wsapiQuery,function(err,results) {
 			app.projects = results[0];
-			console.log("projects",app.projects);
+			app.preliminaryEstimates = results[1];
+			app.portfolioItemTypes = results[2];
+			console.log("projects",app.projects,app.preliminaryEstimates,app.portfolioItemTypes);
 			app.readPortfolioItems();
 		});
 
@@ -108,9 +148,9 @@ Ext.define('CustomApp', {
 		return {
 			fetch : ['Name','_UnformattedID','ObjectID','_TypeHierarchy', '_ItemHierarchy',
 						'InvestmentCategory','PortfolioItemType','State','Owner','Project','Parent',
-						'Release','FormattedID'
+						'Release','FormattedID','PreliminaryEstimate'
 					],
-			hydrate : ['_TypeHierarchy','State','PortfolioItemType','InvestmentCategory','Release'],
+			hydrate : ['_TypeHierarchy','State','PortfolioItemType','InvestmentCategory','Release','PreliminaryEstimate'],
 			pageSize:1000,
 			find : {
 				'_TypeHierarchy' : { "$in" : [type]},
@@ -123,7 +163,15 @@ Ext.define('CustomApp', {
 
 	readPortfolioItems : function() {
 
-		var configs = _.map( types, function(type) {
+		var types = _.filter(app.portfolioItemTypes, function(t) {
+			return t.get("Ordinal") >= 0;
+		});
+
+		var typePaths = _.map(types,function(t){
+			return t.get("TypePath");
+		});
+
+		var configs = _.map( typePaths , function(type) {
 			return app.createConfigForPortfolioType(type);
 		});
 
@@ -261,23 +309,28 @@ Ext.define('CustomApp', {
 		var releaseDeriver = function(record) {
 			return record.Release.Name;
 		};
+		var preliminaryEstimateDeriver = function(record) {
+			var pe = _.find(app.preliminaryEstimates,function(p) {
+				return p.get("ObjectID") === record.PreliminaryEstimate
+			});
+			// console.log("value",pe ? pe.get("Value") : "none");
+			return (!_.isUndefined(pe) && !_.isNull(pe)) ? pe.get("Value") : 0;
+		};
 
 		var derived = {
 			"Initiative" : initDeriver,
 			"OwnerName" : ownerDeriver,
-			"Release" : releaseDeriver
+			"Release" : releaseDeriver,
+			"PreliminaryEstimateValue" : preliminaryEstimateDeriver
 		};   
 
 		var aggNames = _.map(app.rollups, function(r) { return r.summary.attrName; });
 		var aggs = _.map(app.rollups, function(r) { return r.summary.aggregator; });
 		var aggregators = _.zipObject(aggNames, aggs);
 
-		var hidden = ["Project","Owner","ObjectID","_TypeHierarchy","_UnformattedID","_ValidFrom","_ValidTo","PortfolioItemType","_ItemHierarchy"];
+		var hidden = ["Project","Owner","ObjectID","_TypeHierarchy","_UnformattedID","_ValidFrom","_ValidTo","PortfolioItemType","_ItemHierarchy", "PreliminaryEstimate"]; 
 		var attrNames = _.map(app.rollups,function(rollup){return rollup.summary.attrName;});
 		hidden = hidden.concat(attrNames);
-		console.log("hidden",attrNames);
-
-		console.log("aggregators",aggregators);
 
 		$(app.jqPanel).pivotUI(
 			data,                    

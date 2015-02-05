@@ -2,7 +2,7 @@
    "name": "portfolio-pivot-table",
    "className": "CustomApp",
    "server": "https://rally1.rallydev.com",
-   "sdk": "2.0rc3",
+   "sdk": "2.0",
    "javascript": [
       "https://cdnjs.cloudflare.com/ajax/libs/async/1.22/async.min.js",
       "https://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.min.js",

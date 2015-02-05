@@ -34,6 +34,8 @@ Ext.define("FeatureRollUp", function() {
                 };
             });
 
+            // console.log("config",_.first(configs));
+
             async.map(configs, that.rollUp, function(error,result) {
                 _.each(features,function(feature,i) {
                     feature.set(that.attrName,result[i]);
@@ -49,6 +51,7 @@ Ext.define("FeatureRollUp", function() {
         
             var hydrate = ['_TypeHierarchy'];
             var fetch = hydrate.concat(config.operation.fields);
+            
             if (!_.isUndefined(config.operation.groupBy)) {
                 fetch.push(config.operation.groupBy);
                 hydrate.push(config.operation.groupBy);
@@ -73,20 +76,20 @@ Ext.define("FeatureRollUp", function() {
                 var keys = _.keys(grouped);
                 var totals = _.map( keys, function(key) {
                     var keySnapshots = grouped[key];
-                    return _.reduce( keySnapshots, function(memo,s) {
-                        var val = null; var fv = s[field] ? parseFloat(s[field]) : 0;
-                        switch( config.operation.operator ) {
-                            case 'sum': 
-                                val = memo + fv; break;
-                            case 'count':
-                                val = memo + 1; break;
-                            default : 
-                                console.log("no valid operator specified",config.operation);
-                        };
-                        return val;
-                    },0);
+                    switch( config.operation.operator ) {
+                        case 'count':
+                            return keySnapshots.length; break;
+                        case 'sum': 
+                            return _.reduce( keySnapshots, function(memo,s) {
+                                return memo + (_.isNumber(s[field]) ? parseFloat(s[field]):0);
+                            });
+                            val = memo + fv; break;
+                        default : 
+                            console.log("no valid operator specified",config.operation);
+                    };
                 });
                 return _.zipObject(keys,totals);
+
             };
 
             // eg. Task Estimate
